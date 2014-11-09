@@ -8,8 +8,8 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../openCV-Homework2/prep-for-grilling.jpg }"
-             "{filter   |1  |0                             }";
+    keyMap = "{path     |   |../ComputerVision/prep-for-grilling.jpg }"
+             "{filter   |1  |0                                       }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
