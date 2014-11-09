@@ -51,8 +51,11 @@ int main( int argc, const char** argv ) {
 void mouseListener(int event, int x, int y, int, void* userdata) {
     //On left doubleclick the points will be selected
     if(event == EVENT_LBUTTONDOWN) {
+        //Cast of the userdata pointer
         vector<Point2f>* destinationPoints = static_cast<vector<Point2f>*>(userdata);
         destinationPoints->push_back(Point2f(x, y));
+
+        //Draw the point in the destination image and show it
         circle(DESTINATIONIMAGE, Point(x, y), 7, Scalar(0, 0, 255), CV_FILLED);
         imshow("Destination Image", DESTINATIONIMAGE);
 
