@@ -6,7 +6,7 @@ int main( int argc, const char** argv ) {
     Vec3b intensity;
 
     //Standard image that will be used if dont exist arguments
-    keyMap = "{1||../openCV-Homework1/62962.jpg}";
+    keyMap = "{1||../Bilder/62962.jpg}";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
