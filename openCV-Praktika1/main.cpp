@@ -52,9 +52,11 @@ void mouseListener(int event, int x, int y, int, void* userdata) {
     //On left doubleclick the points will be selected
     if(event == EVENT_LBUTTONDOWN) {
         vector<Point2f>* destinationPoints = static_cast<vector<Point2f>*>(userdata);
-        if(destinationPoints->size() < 4)
-            destinationPoints->push_back(Point2f(x, y));
-        else {
+        destinationPoints->push_back(Point2f(x, y));
+        circle(DESTINATIONIMAGE, Point(x, y), 7, Scalar(0, 0, 255), CV_FILLED);
+        imshow("Destination Image", DESTINATIONIMAGE);
+
+        if(destinationPoints->size() >= 4) {
             Mat homography, sourceWarped;
             //Deactivate the mouselistener
             setMouseCallback("Destination Image", NULL);
