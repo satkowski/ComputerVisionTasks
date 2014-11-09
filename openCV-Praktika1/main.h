@@ -8,6 +8,6 @@
 
 using namespace cv;
 
-main( int argc, const char** argv );
+int main( int argc, const char** argv );
 
 #endif // MAIN_H
