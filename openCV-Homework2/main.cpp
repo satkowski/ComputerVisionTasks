@@ -1,11 +1,10 @@
 #include <main.h>
 
-
 int main( int argc, const char** argv ) {
     String filename;
     int filter, windowSize = 0;
     Mat image, outputImage;
-
+    Vec<void*, 2>* data;
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
@@ -25,6 +24,9 @@ int main( int argc, const char** argv ) {
     }
     image.copyTo(outputImage);
 
+    data->val[0] = &filter;
+    data->val[1] = &image;
+
     //Creating windows for the images
     namedWindow("Filtered Image", 0);
     imshow("Filtered Image", outputImage);
@@ -33,80 +35,27 @@ int main( int argc, const char** argv ) {
     imshow("Original Image", image);
 
     //Adding the area trackbar to the window
-    createTrackbar("Window Size", "Filtered Image", &windowSize, 100, integralImage, &outputImage);
+    createTrackbar("Window Size", "Filtered Image", &windowSize, 100, filterSelect, data);
 
     waitKey();
     return 0;
 }
 
-static void integralImage(int w, void* userdata) {
-    int i, j, wArea = (2*w + 1)*(2*w +1);
-    Mat temp, output;
-    Mat* input;
-    input = static_cast<Mat*>(userdata);
-    Mat areas(input->rows + 2*w, input->cols + 2*w, CV_64FC3);
-    //Convert the image
-    input->convertTo(temp, CV_64FC3);
-    
-    //Fill the first row and column with 0
-    for(int cY = 0; cY <= input->rows; cY++)
-        areas.at<Vec3d>(cY, 0) = 0;
-    for(int cX = 0; cX <= input->cols; cX++)
-        areas.at<Vec3d>(0, cX) = 0;
+static void filterSelect(int windowSize, void* userdata) {
+    //Cast all variables
+    Vec<void*, 3>* data = static_cast<Vec<void*, 3>*>(userdata);
+    int* filter = static_cast<int*>(data->val[0]);
+    Mat* image = static_cast<Mat*>(data->val[1]);
+    Mat outputImage;
+    image->copyTo(outputImage);
 
-    //Calculate the "integral" of the window from (0,0) to the pixel
-    for(int cY = 0; cY < (input->rows + 2*w); cY++) {
-        //Calculate the mirror coordinate
-        if(cY - w <= 0)                 j = (cY - w) * - 1;
-        else if(cY - w >= input->rows)   j = (cY - w) - ((cY - w) - input->rows + 1);
-        else                            j = (cY - w);
-
-        for(int cX = 0; cX < (input->cols + 2*w); cX++) {
-            //Calculate the mirror coordinate
-            if(cX - w <= 0)                 i = (cX - w) * - 1;
-            else if(cX - w >= input->cols)   i = (cX - w) - ((cX - w) - input->cols + 1);
-            else                            i = (cX - w);
-
-            //Add the color of the actual pixel
-            areas.at<Vec3d>(cY, cX) = temp.at<Vec3d>(j, i);
-
-            //Add the sum of the areas before if there are any
-            if(cY - 1 >= 0 && cX - 1 >= 0)
-                areas.at<Vec3d>(cY, cX) += areas.at<Vec3d>(cY - 1, cX) +
-                                           areas.at<Vec3d>(cY, cX - 1) -
-                                           areas.at<Vec3d>(cY  - 1, cX - 1);
-            else if(cY  - 1 < 0 && cX  - 1 >= 0)
-                areas.at<Vec3d>(cY, cX) += areas.at<Vec3d>(cY, cX - 1);
-            else if(cY  - 1 >= 0 && cX  - 1 < 0)
-                areas.at<Vec3d>(cY, cX) += areas.at<Vec3d>(cY - 1, cX);
-        }
+    //Decesion which filter should be choosed
+    switch(*filter) {
+    case 0:
+        meanFilter(windowSize, &outputImage);
+        break;
     }
 
-    //Calculate the mean for every pixel with the window size
-    for(int cY = 0; cY < input->rows; cY++) {
-        //Calculate the center of the window
-        j = cY + w;
-        for(int cX = 0; cX < input->cols; cX++) {
-            //Calculate the center of the window
-            i = cX + w;
-
-            //Calculate the sum of the window
-            temp.at<Vec3d>(cY, cX) = areas.at<Vec3d>(j + w, i + w);
-            if((j - w - 1) >= 0 && (i - w - 1) >= 0)
-                temp.at<Vec3d>(cY, cX) = temp.at<Vec3d>(cY, cX) -
-                                         areas.at<Vec3d>(j + w, i - w - 1) -
-                                         areas.at<Vec3d>(j - w - 1, i + w) +
-                                         areas.at<Vec3d>(j - w - 1, i - w - 1);
-            else if((j - w - 1) < 0 && (i - w - 1) >= 0)
-                temp.at<Vec3d>(cY, cX) -= areas.at<Vec3d>(j + w, i - w - 1);
-            else if((j - w - 1) >= 0 && (i - w - 1) < 0)
-                temp.at<Vec3d>(cY, cX) -= areas.at<Vec3d>(j - w - 1, i + w);
-            //Calculate the mean of the window
-            temp.at<Vec3d>(cY, cX) /= wArea;
-        }
-    }
-
-    //Convert the image back
-    temp.convertTo(output, CV_8UC3);
-    imshow("Filtered Image", output);
+    //Show the new filtered image
+    imshow("Filtered Image", outputImage);
 }
