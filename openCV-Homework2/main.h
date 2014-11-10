@@ -4,11 +4,14 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+#include <set>
 #include <stdio.h>
 
 using namespace cv;
 
-Mat integralImage(Mat input);
+typedef std::multiset<Vec3f> rgbMap;
+
+static void integralImage(int w, void* userdata);
 
 //Main method
 int main( int argc, const char** argv );
