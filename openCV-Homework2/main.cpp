@@ -54,6 +54,12 @@ static void filterSelect(int windowSize, void* userdata) {
     case 0:
         meanFilter(windowSize, &outputImage);
         break;
+    case 1:
+        medianFilter(windowSize, &outputImage);
+        break;
+    default:
+        meanFilter(windowSize, &outputImage);
+        break;
     }
 
     //Show the new filtered image

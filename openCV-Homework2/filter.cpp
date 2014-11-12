@@ -4,6 +4,7 @@ void meanFilter(int w, Mat* input) {
     int i, j, wArea = (2*w + 1)*(2*w +1);
     Mat temp, output;
     Mat areas(input->rows + 2*w, input->cols + 2*w, CV_64FC3);
+
     //Convert the image
     input->convertTo(temp, CV_64FC3);
 
@@ -17,13 +18,13 @@ void meanFilter(int w, Mat* input) {
     for(int cY = 0; cY < (input->rows + 2*w); cY++) {
         //Calculate the mirror coordinate
         if(cY - w <= 0)                 j = (cY - w) * - 1;
-        else if(cY - w >= input->rows)   j = (cY - w) - ((cY - w) - input->rows + 1);
+        else if(cY - w >= input->rows)  j = (cY - w) - ((cY - w) - input->rows + 1);
         else                            j = (cY - w);
 
         for(int cX = 0; cX < (input->cols + 2*w); cX++) {
             //Calculate the mirror coordinate
             if(cX - w <= 0)                 i = (cX - w) * - 1;
-            else if(cX - w >= input->cols)   i = (cX - w) - ((cX - w) - input->cols + 1);
+            else if(cX - w >= input->cols)  i = (cX - w) - ((cX - w) - input->cols + 1);
             else                            i = (cX - w);
 
             //Add the color of the actual pixel
@@ -68,4 +69,31 @@ void meanFilter(int w, Mat* input) {
     //Convert the image back
     temp.convertTo(output, CV_8UC3);
     *input = output;
+}
+
+void medianFilter(int w, Mat* input) {
+    int i, j, wArea = (2*w + 1)*(2*w +1);
+    Mat temp, output;
+    MatSet medianSets;
+    medianSets.val[0][0];
+
+
+    //Convert the image
+    input->convertTo(temp, CV_64FC3);
+
+    for(int cY = 0; cY < input->rows; cY++) {
+        //Calculate the mirror coordinate
+        if(cY - w <= 0)                 j = (cY - w) * - 1;
+        else if(cY - w >= input->rows)  j = (cY - w) - ((cY - w) - input->rows + 1);
+        else                            j = (cY - w);
+
+        for(int cX = 0; cX < input->cols; cX++) {
+            //Calculate the mirror coordinate
+            if(cX - w <= 0)                 i = (cX - w) * - 1;
+            else if(cX - w >= input->cols)  i = (cX - w) - ((cX - w) - input->cols + 1);
+            else                            i = (cX - w);
+
+
+        }
+    }
 }
