@@ -3,12 +3,9 @@
 
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include <set>
+#include <multiset.h>
 
 using namespace cv;
-
-typedef Vec<std::multiset<Vec3d>, 2> Vec2Set;
-typedef Matx<Vec2Set, 2, 2> MatSet;
 
 //Method for the mean filter
 void meanFilter(int w, Mat* input);

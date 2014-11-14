@@ -72,11 +72,9 @@ void meanFilter(int w, Mat* input) {
 }
 
 void medianFilter(int w, Mat* input) {
-    int i, j, wArea = (2*w + 1)*(2*w +1);
+    int i, j;
     Mat temp, output;
-    MatSet medianSets;
-    medianSets.val[0][0];
-
+    Mat pixelSet = Mat_<Vec3dSet>(input->rows, input->cols);
 
     //Convert the image
     input->convertTo(temp, CV_64FC3);
