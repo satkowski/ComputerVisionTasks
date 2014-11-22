@@ -28,10 +28,10 @@ int main( int argc, const char** argv ) {
     }
 
     //Add the corners of the source image
-    SOURCEPOINTS.push_back(Point2f(0,                0));
-    SOURCEPOINTS.push_back(Point2f(0,                SOURCEIMAGE.rows));
-    SOURCEPOINTS.push_back(Point2f(SOURCEIMAGE.cols, SOURCEIMAGE.rows));
-    SOURCEPOINTS.push_back(Point2f(SOURCEIMAGE.cols, 0));
+    SOURCEPOINTS.push_back(Point2f(0,                    0));
+    SOURCEPOINTS.push_back(Point2f(0,                    SOURCEIMAGE.rows - 1));
+    SOURCEPOINTS.push_back(Point2f(SOURCEIMAGE.cols - 1, SOURCEIMAGE.rows - 1));
+    SOURCEPOINTS.push_back(Point2f(SOURCEIMAGE.cols - 1, 0));
 
     //Creating windows for the images
     namedWindow("Source Image", 0);

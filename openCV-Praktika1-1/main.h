@@ -9,8 +9,8 @@
 
 using namespace cv;
 
-static vector<Point2f> SOURCEPOINTS;
 static Mat SOURCEIMAGE, DESTINATIONIMAGE;
+static vector<Point2f> SOURCEPOINTS;
 
 //Creates and show the solution image
 void showFinal(Mat destination,Mat source);
