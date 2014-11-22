@@ -1,6 +1,10 @@
-#include <filter.h>
+﻿#include <filter.h>
 
 void meanFilter(int w, Mat* input) {
+    //Show the original image
+    if(w == 0)
+        return;
+
     int i, j, wArea = (2*w + 1)*(2*w +1);
     Mat temp, output;
     Mat areas(input->rows + 2*w, input->cols + 2*w, CV_64FC3);
@@ -72,26 +76,83 @@ void meanFilter(int w, Mat* input) {
 }
 
 void medianFilter(int w, Mat* input) {
+    //Show the original image
+    if(w == 0)
+        return;
+
     int i, j;
-    Mat temp, output;
-    Mat pixelSet = Mat_<Vec3dSet>(input->rows, input->cols);
+    Mat tempInput, tempOutput, output;
+    Vec3dSet oldRowPixelSet, actualpixelSet;
+    std::_Rb_tree_const_iterator<Vec3d> median;
 
     //Convert the image
-    input->convertTo(temp, CV_64FC3);
+    input->convertTo(tempInput, CV_64FC3);
+    input->convertTo(tempOutput, CV_64FC3);
 
-    for(int cY = 0; cY < input->rows; cY++) {
-        //Calculate the mirror coordinate
-        if(cY - w <= 0)                 j = (cY - w) * - 1;
-        else if(cY - w >= input->rows)  j = (cY - w) - ((cY - w) - input->rows + 1);
-        else                            j = (cY - w);
-
-        for(int cX = 0; cX < input->cols; cX++) {
-            //Calculate the mirror coordinate
-            if(cX - w <= 0)                 i = (cX - w) * - 1;
-            else if(cX - w >= input->cols)  i = (cX - w) - ((cX - w) - input->cols + 1);
-            else                            i = (cX - w);
-
-
+    for(int wY = - w; wY < w; wY++) {
+        for(int wX = - w; wX < w; wX++) {
+            actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
+            //If wX == 0 the same column should be choosed again
+            if(wX == 0)
+                actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
+            //If wY == 0 the same row should be choosed again
+            if(wY == 0) {
+                actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
+                if(wX == 0)
+                    actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
+            }
         }
     }
+
+    for(int cY = 0; cY < input->rows; cY++) {
+        //Add the median of all pixels in the window to the new image
+        median = actualpixelSet.begin();
+        std::advance(median, actualpixelSet.size() / 2);
+        tempOutput.at<Vec3d>(cY, 0) = *median;
+        oldRowPixelSet = actualpixelSet;
+
+        for(int cX = 1; cX < input->cols; cX++) {
+            //Calculate the mirror coordinate
+            if(cX + w >= input->cols)   i = (cX + w) - ((cX + w) - input->cols + 2);
+            else                        i = (cX + w);
+
+            //Erase the left pixel of the old window and add the right ones
+            for(int wY = 0; wY <= 2*w; wY++) {
+                //Calculate the mirror coordinate ------- Optimierung an der Stelle!!!
+                if(cY + w - wY <= 0)                j = (cY + w - wY) * -1;
+                else if(cY + w -wY >= input->rows)  j = (cY + w - wY) - ((cY + w - wY) - input->rows + 2);
+                else                                j =  cY + w - wY;
+
+//                Vec3d test1 = tempInput.at<Vec3d>(j, abs(cX - w));
+//                std::_Rb_tree_const_iterator<Vec3d> test2 = actualpixelSet.find(tempInput.at<Vec3d>(j, abs(cX - w)));
+                actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(j, abs(cX - w - 1))));
+                actualpixelSet.insert(tempInput.at<Vec3d>(j, i));
+            }
+
+            //Add the median of all pixels in the window to the new image
+            median = actualpixelSet.begin();
+            std::advance(median, actualpixelSet.size() / 2);
+//            Vec3d test3 = *median;
+            tempOutput.at<Vec3d>(cY, cX) = *median;
+        }
+        if(cY == input->rows - 1)
+            continue;
+
+        //Calculate the mirror coordinate
+        if(cY + 1 + w >= input->rows)   j = (cY + 1 + w) - ((cY + 1 + w) - input->rows + 2);
+        else                            j = (cY + 1 + w);
+
+        actualpixelSet = oldRowPixelSet;
+        //Erase the upper pixel of the old window and add the lower ones
+        for(int wX = 0; wX <= 2*w; wX++) {
+            //Calculate the mirror coordinate
+            i = abs(w - wX);
+
+            actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(abs(cY - w), i)));
+            actualpixelSet.insert(tempInput.at<Vec3d>(j, i));
+        }
+    }
+    //Convert the image back
+    tempOutput.convertTo(output, CV_8UC3);
+    *input = output;
 }

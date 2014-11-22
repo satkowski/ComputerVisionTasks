@@ -11,7 +11,7 @@ using namespace cv;
 //Struct for the comparsion in the multiset
 struct compValue {
     //Using own comparsion method for the Vec3d
-    bool operator()(Vec3d left, Vec3d right) const;
+    bool operator()(const Vec3d& left,const Vec3d& right) const;
 };
 
 typedef std::multiset<Vec3d, compValue> Vec3dSet;

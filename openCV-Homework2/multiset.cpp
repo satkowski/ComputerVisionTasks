@@ -1,7 +1,6 @@
 #include <multiset.h>
 
-//Using own comparsion method for the Vec3d
-bool compValue::operator ()(Vec3d left, Vec3d right) const{
+bool compValue::operator()(const Vec3d& left,const Vec3d& right) const{
     float leftSum, rightSum;
 
     //Calculate the distance of the vectors

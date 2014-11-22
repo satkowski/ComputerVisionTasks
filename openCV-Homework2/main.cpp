@@ -8,8 +8,8 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
-             "{filter   |1  |0                               }";
+    keyMap = "{path     |   |../Bilder/Unbenannt.jpg }"
+             "{filter   |1  |1                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -31,11 +31,11 @@ int main( int argc, const char** argv ) {
     namedWindow("Filtered Image", 0);
     imshow("Filtered Image", outputImage);
 
-    namedWindow("Original Image", 0);
-    imshow("Original Image", image);
+//    namedWindow("Original Image", 0);
+//    imshow("Original Image", image);
 
     //Adding the area trackbar to the window
-    createTrackbar("Window Size", "Filtered Image", &windowSize, 100, filterSelect, data);
+    createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols > image.rows) ? image.cols - 1 : image.rows - 1, filterSelect, data);
 
     waitKey();
     return 0;

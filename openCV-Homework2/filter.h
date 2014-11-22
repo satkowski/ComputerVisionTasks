@@ -5,6 +5,7 @@
 
 #include <multiset.h>
 
+using namespace std;
 using namespace cv;
 
 //Method for the mean filter
