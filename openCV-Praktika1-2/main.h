@@ -15,6 +15,8 @@ static Mat SOURCEIMAGE;
 static void calcCameraPosition(int, void* userdata);
 //Method that calculate the affine transformation
 static void calcAffineTransformation(int, void* userdata);
+//Method that calculate the new rotation matrix
+static void calcRotationMatrix(int value, void* userdata);
 
 //Main method
 int main( int argc, const char** argv );
