@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = Praktika_1
+TARGET = Praktika_1-1
 CONFIG   += console
 CONFIG   -= app_bundle
 
