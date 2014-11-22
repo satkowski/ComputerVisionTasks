@@ -9,6 +9,8 @@
 
 using namespace cv;
 
+static Mat SOURCEIMAGE;
+
 //Method that calculate the camera position
 static void calcCameraPosition(int, void* userdata);
 //Method that calculate the affine transformation
