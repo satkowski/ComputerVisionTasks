@@ -10,7 +10,13 @@
 using namespace cv;
 
 static Mat SOURCEIMAGE;
+static Mat DESTINATIONIMAGE(512, 512, CV_8UC4);
+static vector<Point> SOURCEPOINTS;
+static const int ALPHA = 10;
+static int U0, V0;
 
+//Method that calculate the image inside the camera
+static void calcCameraImage(int, void* userdata);
 //Method that calculate the camera position
 static void calcCameraPosition(int, void* userdata);
 //Method that calculate the affine transformation
