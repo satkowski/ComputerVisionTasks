@@ -6,14 +6,18 @@
 #include "opencv2/calib3d/calib3d.hpp"
 
 #include <stdio.h>
+#include <iostream>
+
+#define PI 3.14159265
 
 using namespace cv;
 
-static Mat SOURCEIMAGE;
-static Mat DESTINATIONIMAGE(512, 512, CV_8UC4);
-static vector<Point> SOURCEPOINTS;
-static const int ALPHA = 10;
+static Mat SOURCE_IMAGE;
+static Mat DESTINATION_IMAGE(512, 512, CV_8UC4);
+static vector<Point2f> SOURCE_POINTS_ORIG, SOURCE_POINTS_SHIFT;
+static const int ALPHA = 100;
 static int U0, V0;
+static Mat INTRINSIC_CAM_PAR_MAT = Mat_<double>(3, 3);
 
 //Method that calculate the image inside the camera
 static void calcCameraImage(int, void* userdata);
