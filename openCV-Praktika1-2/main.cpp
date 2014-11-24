@@ -41,33 +41,23 @@ int main( int argc, const char** argv ) {
     INTRINSIC_CAM_PAR_MAT.at<double>(2, 1) = 0;
     INTRINSIC_CAM_PAR_MAT.at<double>(2, 2) = 1;
 
-    //Calculating the new coordinates for the center of the image
-    if(SOURCE_IMAGE.cols % 2 == 1) { xNeg = 0 - U0 - 1;     xPos = SOURCE_IMAGE.cols - U0;      }
-    else {                           xNeg = 0 - U0;         xPos = SOURCE_IMAGE.cols - U0 - 1;  }
-    if(SOURCE_IMAGE.rows % 2 == 1) { yNeg = 0 - V0 - 1;     yPos = SOURCE_IMAGE.rows - V0;      }
-    else {                           yNeg = 0 - V0;         yPos = SOURCE_IMAGE.rows - V0 - 1;  }
-
-//        xNeg = 0 - U0;
-//        xPos = SOURCE_IMAGE.cols - U0 - 1;
-//        if(SOURCE_IMAGE.rows % 2 == 1) {
-//            yNeg = 0 - U0;
-//            yPos = SOURCE_IMAGE.rows - V0 - 1;
-//        }
-//        else {
-//            yNeg = 0 - V0 + 1;
-//            yPos = SOURCE_IMAGE.rows - V0;
-//        }
     //Add the corners of the source image
-    SOURCE_POINTS_ORIG.push_back(Point2f(0,                     SOURCE_IMAGE.rows - 1));     //Upper right corner
-    SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, SOURCE_IMAGE.rows - 1));     //Down right corner
     SOURCE_POINTS_ORIG.push_back(Point2f(0,                     0));                         //Upper left corner
-    SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, 0));                         //Down left corner
+    SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, 0));                         //Upper right corner
+    SOURCE_POINTS_ORIG.push_back(Point2f(0,                     SOURCE_IMAGE.rows - 1));     //Down left corner
+    SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, SOURCE_IMAGE.rows - 1));     //Down right corner
 
-    //Add the corners of the destination image
-    SOURCE_POINTS_SHIFT.push_back(Point2f(xNeg, yPos));      //Upper left corner
+    //Calculating the new coordinates for the center of the image
+    xNeg = 0 - U0;
+    xPos = SOURCE_IMAGE.cols - U0 - 1;
+    if(SOURCE_IMAGE.rows % 2 == 1) {    yNeg = 0 - U0;      yPos = SOURCE_IMAGE.rows - V0 - 1;  }
+    else {                              yNeg = 0 - V0 + 1;  yPos = SOURCE_IMAGE.rows - V0;      }
+
+    //Add the corners of the shifted image on the plan in the 3d room
     SOURCE_POINTS_SHIFT.push_back(Point2f(xNeg, yNeg));      //Down left corner
-    SOURCE_POINTS_SHIFT.push_back(Point2f(xPos, yPos));      //Upper right corner
     SOURCE_POINTS_SHIFT.push_back(Point2f(xPos, yNeg));      //Down right corner
+    SOURCE_POINTS_SHIFT.push_back(Point2f(xNeg, yPos));      //Upper left corner
+    SOURCE_POINTS_SHIFT.push_back(Point2f(xPos, yPos));      //Upper right corner
     //-----------------------------------------------------
 
     //Filling the rotation matrix
@@ -79,7 +69,7 @@ int main( int argc, const char** argv ) {
     rotMat.at<double>(0, 0) = cos(0);
     rotMat.at<double>(1, 0) = sin(0);
     rotMat.at<double>(0, 1) = -rotMat.at<double>(1, 0);
-    rotMat.at<double>(1, 1) = -rotMat.at<double>(0, 0);
+    rotMat.at<double>(1, 1) = rotMat.at<double>(0, 0);
 
     //Creating the original image window
     namedWindow("Original Image", 0);
@@ -142,7 +132,7 @@ static void calcCameraImage(int, void* userdata) {
     camPos = static_cast<Point3d*>(data->val[1]);
     rotMat = static_cast<Mat*>(data->val[2]);
 
-    //Fill the second matrix
+    //Fill the extrinsic camera parameter matrix
     for(int cY = 0; cY < 3; cY++) {
         for(int cX = 0; cX < 3; cX++)
             extrinsicCamMat.at<double>(cY, cX) = rotMat->at<double>(cY, cX);
