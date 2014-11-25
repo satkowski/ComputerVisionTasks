@@ -13,8 +13,8 @@
 using namespace cv;
 
 static Mat SOURCE_IMAGE;
-static Mat DESTINATION_IMAGE(512, 512, CV_8UC4);
-static vector<Point2f> SOURCE_POINTS_ORIG, SOURCE_POINTS_SHIFT;
+static Mat CAMERA_IMAGE(512, 512, CV_8UC4);
+static vector<Point2f> SOURCE_POINTS_ORIG, SOURCE_POINTS_SHIFT, CAMERA_IMAGE_POINTS;
 static const int ALPHA = 100;
 static int U0, V0;
 static Mat INTRINSIC_CAM_PAR_MAT = Mat_<double>(3, 3);
