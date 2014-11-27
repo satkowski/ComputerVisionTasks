@@ -7,11 +7,11 @@ int main( int argc, const char** argv ) {
     Point3d camPos;
     Vec3i affineTrans (0, 0, 1);
     Mat rotMat = Mat_<double>(3, 3);
+    const char* keyMap;
     /*-----------------------------------------*/
 
     Vec<void*, 4> data (&spherCoord, &camPos, &rotMat, &affineTrans);
 
-    const char* keyMap;
     //Standard image that will be used if dont exist arguments
     keyMap = "{1       |   |../Bilder/prep-for-grilling.jpg }";
 
@@ -64,8 +64,9 @@ static void onTrackbarRotMat(int, void* userdata) {
     Vec<void*, 3>* data;
     Vec3i* spherCoord;
     Mat* rotMat;    
-    Mat rotMatZ = Mat_<double>(3, 3);
+    Mat rotMatX = Mat_<double>(3, 3);
     Mat rotMatY = Mat_<double>(3, 3);
+    Mat rotMatZ = Mat_<double>(3, 3);
     /*-----------------------------------------*/
 
     //Cast of the userdata
@@ -74,18 +75,23 @@ static void onTrackbarRotMat(int, void* userdata) {
     rotMat = static_cast<Mat*>(data->val[2]);
 
     //Filling the rotation matrix
-    //Rotationmatrix for the rotation on the Z axis - using rho
-    rotMatZ = (Mat_<double>(3, 3) <<
-              cos(spherCoord->val[2] * PI / 180),    -sin(spherCoord->val[2] * PI / 180),   0,
-              sin(spherCoord->val[2] * PI / 180),     cos(spherCoord->val[2] * PI / 180),   0,
-              0,                                      0,                                    1);
-    //Rotationmatrix for the rotation on the y axis - using theta
+//    //Rotationmatrix for the rotation on the x axis - using rho
+//    rotMatX = (Mat_<double>(3, 3) <<
+//              1,    0,                                   0,
+//              0,    cos(spherCoord->val[1] * PI / 180), -sin(spherCoord->val[1] * PI / 180),
+//              0,    sin(spherCoord->val[1] * PI / 180),  cos(spherCoord->val[1] * PI / 180));
+    //Rotationmatrix for the rotation on the y axis - using rho
     rotMatY = (Mat_<double>(3, 3) <<
               cos(spherCoord->val[1] * PI / 180),   0,  sin(spherCoord->val[1] * PI / 180),
               0,                                    1,  0,
               -sin(spherCoord->val[1] * PI / 180),  0,  cos(spherCoord->val[1] * PI / 180));
+    //Rotationmatrix for the rotation on the Z axis - using theta
+    rotMatZ = (Mat_<double>(3, 3) <<
+              cos(spherCoord->val[2] * PI / 180),    -sin(spherCoord->val[2] * PI / 180),   0,
+              sin(spherCoord->val[2] * PI / 180),     cos(spherCoord->val[2] * PI / 180),   0,
+              0,                                      0,                                    1);
 
-    *rotMat = rotMatY * rotMatZ;
+    *rotMat = (rotMatZ * rotMatY);
 
     //Calling the camera position method
     onTrackbar(0, userdata);
@@ -113,6 +119,7 @@ void calcCameraPosition(int, void* userdata) {
     camPos->y = lengthOnXY * sin(spherCoord->val[2] * PI / 180);
     //Calculate the coordinate on the z axis with theta
     camPos->z = spherCoord->val[0] * cos(spherCoord->val[1] * PI / 180);
+    std::cout << *camPos << std::endl;
 }
 void calcCameraImage(int, void* userdata) {
     /*------------- initialization ------------*/
