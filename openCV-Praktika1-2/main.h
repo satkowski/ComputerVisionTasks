@@ -31,7 +31,7 @@ void fillVariables(Mat& rotMat);
 //Method that calculate all the transformation
 static void onTrackbar(int, void* userdata);
 //Method that calculate the new rotation matrix
-static void onTrackbarRotMat(int value, void* userdata);
+static void onTrackbarRotMat(int, void* userdata);
 
 //Method that calculate the image inside the camera
 void calcCameraImage(int, void* userdata);

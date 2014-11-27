@@ -13,7 +13,7 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{1       |   |../Bilder/62962.jpg }";
+    keyMap = "{1       |   |../Bilder/prep-for-grilling.jpg }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -38,7 +38,7 @@ int main( int argc, const char** argv ) {
 
     //Adding the trackbars for the spherical coordinates
     createTrackbar("radius", "Camera Image", &(spherCoord.val[0]), ALPHA * 15, onTrackbar, &data);
-    createTrackbar("theta ", "Camera Image", &(spherCoord.val[1]), 90, onTrackbar, &data);
+    createTrackbar("theta ", "Camera Image", &(spherCoord.val[1]), 90, onTrackbarRotMat, &data);
     createTrackbar("rho   ", "Camera Image", &(spherCoord.val[2]), 360, onTrackbarRotMat, &data);
     //Adding the trackbars for the affine transformation
     createTrackbar("alpha", "Affine Transformation", &(affineTrans.val[0]), 360, onTrackbar, &data);
@@ -59,21 +59,33 @@ static void onTrackbar(int, void* userdate) {
     imshow("Camera Image", CAMERA_IMAGE);
     imshow("Affine Transformation", AFFINE_IMAGE);
 }
-static void onTrackbarRotMat(int value, void* userdata) {
+static void onTrackbarRotMat(int, void* userdata) {
     /*------------- initialization ------------*/
     Vec<void*, 3>* data;
-    Mat* rotMat;
+    Vec3i* spherCoord;
+    Mat* rotMat;    
+    Mat rotMatZ = Mat_<double>(3, 3);
+    Mat rotMatY = Mat_<double>(3, 3);
     /*-----------------------------------------*/
 
     //Cast of the userdata
     data = static_cast<Vec<void*, 3>*>(userdata);
+    spherCoord = static_cast<Vec3i*>(data->val[0]);
     rotMat = static_cast<Mat*>(data->val[2]);
 
-    //Calculation of the new entrys of the rotation matrix
-    rotMat->at<double>(0, 0) = cos(value * PI / 180);
-    rotMat->at<double>(1, 0) = sin(value * PI / 180);
-    rotMat->at<double>(0, 1) = -rotMat->at<double>(1, 0);
-    rotMat->at<double>(1, 1) = rotMat->at<double>(0, 0);
+    //Filling the rotation matrix
+    //Rotationmatrix for the rotation on the Z axis - using rho
+    rotMatZ = (Mat_<double>(3, 3) <<
+              cos(spherCoord->val[2] * PI / 180),    -sin(spherCoord->val[2] * PI / 180),   0,
+              sin(spherCoord->val[2] * PI / 180),     cos(spherCoord->val[2] * PI / 180),   0,
+              0,                                      0,                                    1);
+    //Rotationmatrix for the rotation on the y axis - using theta
+    rotMatY = (Mat_<double>(3, 3) <<
+              cos(spherCoord->val[1] * PI / 180),   0,  sin(spherCoord->val[1] * PI / 180),
+              0,                                    1,  0,
+              -sin(spherCoord->val[1] * PI / 180),  0,  cos(spherCoord->val[1] * PI / 180));
+
+    *rotMat = rotMatY * rotMatZ;
 
     //Calling the camera position method
     onTrackbar(0, userdata);
@@ -241,6 +253,8 @@ void calcAffineTransformation(int, void* userdata) {
 void fillVariables(Mat& rotMat) {
     /*------------- initialization ------------*/
     int xPos, xNeg, yPos, yNeg;
+    Mat rotMatX = Mat_<double>(3, 3);
+    Mat rotMatY = Mat_<double>(3, 3);
     /*-----------------------------------------*/
 
     //Calculate the center of the image
@@ -273,19 +287,14 @@ void fillVariables(Mat& rotMat) {
     SOURCE_POINTS_SHIFT.push_back(Point2f(0, 0));            //Upper right corner
 
     //Filling the rotation matrix
-    rotMat = (Mat_<double>(3, 3) <<
-              cos(0),   -sin(0),    0,
-              sin(0),   cos(0),     0,
-              0,        0,          1);
+    rotMatX = (Mat_<double>(3, 3) <<
+              1,    0,           0,
+              0,    cos(0),     -sin(0),
+              0,    sin(0),      cos(0));
+    rotMatY = (Mat_<double>(3, 3) <<
+              cos(0),   0,  sin(0),
+              0,        1,  0,
+              -sin(0),  0,  cos(0));
 
-    //    Mat rotMatX = Mat_<double>(3, 3);
-    //    //Filling the rotation matrix
-    //    rotMatX = (Mat_<double>(3, 3) <<
-    //              1,    0,           0,
-    //              0,    cos(0),     -sin(0),
-    //              0,    sin(0),      cos(0));
-    //    rotMatY = (Mat_<double>(3, 3) <<
-    //              cos(0),   0,  sin(0),
-    //              0,        1,  0,
-    //              -sin(0),  0,  cos(0));
+    rotMat = rotMatX * rotMatY;
 }
