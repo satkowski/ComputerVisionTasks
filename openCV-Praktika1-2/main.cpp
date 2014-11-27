@@ -7,13 +7,14 @@ int main( int argc, const char** argv ) {
     Vec3i spherCoord (0, 0, 0);
     Point3d camPos;
     Vec3i affineTrans (0, 0, 1);
+    Mat rotMatX = Mat_<double>(3, 3);
     Mat rotMat = Mat_<double>(3, 3);
 
     Vec<void*, 4> data (&spherCoord, &camPos, &rotMat, &affineTrans);
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{1       |   |../Bilder/prep-for-grilling.jpg }";
+    keyMap = "{1       |   |../Bilder/62962.jpg }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -26,6 +27,7 @@ int main( int argc, const char** argv ) {
         printf("Cannot read the image %s\n", sourceName.c_str());
         return -1;
     }    
+
     //Calculate the center of the image
     U0 = SOURCE_IMAGE.cols / 2;
     V0 = SOURCE_IMAGE.rows / 2;
@@ -41,7 +43,6 @@ int main( int argc, const char** argv ) {
     SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, 0));                         //Upper right corner
     SOURCE_POINTS_ORIG.push_back(Point2f(0,                     SOURCE_IMAGE.rows - 1));     //Down left corner
     SOURCE_POINTS_ORIG.push_back(Point2f(SOURCE_IMAGE.cols - 1, SOURCE_IMAGE.rows - 1));     //Down right corner
-//    SOURCE_POINTS_ORIG.push_back(Point2f(U0,                    V0));                        //Center
 
     //Calculating the new coordinates for the center of the image
     xNeg = 0 - U0;
@@ -54,7 +55,7 @@ int main( int argc, const char** argv ) {
     SOURCE_POINTS_SHIFT.push_back(Point2f(xPos, yNeg));      //Down right corner
     SOURCE_POINTS_SHIFT.push_back(Point2f(xNeg, yPos));      //Upper left corner
     SOURCE_POINTS_SHIFT.push_back(Point2f(xPos, yPos));      //Upper right corner
-//    SOURCE_POINTS_SHIFT.push_back(Point2f(0,    0));         //Center
+    SOURCE_POINTS_SHIFT.push_back(Point2f(0, 0));            //Upper right corner
     //-----------------------------------------------------
 
     //Filling the rotation matrix
@@ -62,6 +63,16 @@ int main( int argc, const char** argv ) {
               cos(0),   -sin(0),    0,
               sin(0),   cos(0),     0,
               0,        0,          1);
+
+//    //Filling the rotation matrix
+//    rotMatX = (Mat_<double>(3, 3) <<
+//              1,    0,           0,
+//              0,    cos(0),     -sin(0),
+//              0,    sin(0),      cos(0));
+//    rotMatY = (Mat_<double>(3, 3) <<
+//              cos(0),   0,  sin(0),
+//              0,        1,  0,
+//              -sin(0),  0,  cos(0));
 
     //Creating the original image window
     namedWindow("Original Image", 0);
@@ -118,6 +129,8 @@ static void calcCameraImage(int, void* userdata) {
     Mat tempPoint = Mat_<double>(3, 1);
     vector<Point2f> destinationPoints;
 
+    Point2f outputCenter, centerOffset;
+
     Mat homography, sourceWarped;
 
     calcCameraPosition(0, userdata);
@@ -145,22 +158,33 @@ static void calcCameraImage(int, void* userdata) {
         point3D.at<double>(0, 0) = actualPoint.x;
         point3D.at<double>(0, 1) = actualPoint.y;
 
-        tempPoint = extrinsicCamMat * point3D;
-        tempPoint = INTRINSIC_CAM_PAR_MAT * tempPoint;
+        tempPoint = INTRINSIC_CAM_PAR_MAT * (extrinsicCamMat * point3D);
 
         actualPoint.x = tempPoint.at<double>(0, 0) / tempPoint.at<double>(0, 2);
         actualPoint.y = tempPoint.at<double>(0, 1) / tempPoint.at<double>(0, 2);
 
-        destinationPoints.push_back(actualPoint);
+        if(c < SOURCE_POINTS_SHIFT.size() - 1) destinationPoints.push_back(actualPoint);
     }
+
+    //Centering of the image
+    outputCenter = actualPoint;
+    centerOffset = outputCenter - Point2f(255, 255);
+
+    for(int c = 0; c < SOURCE_POINTS_SHIFT.size() - 1; c++)
+        destinationPoints.at(c) -= centerOffset;
 
     //Create homography
     homography = findHomography(SOURCE_POINTS_ORIG, destinationPoints, 0);
 
     //Transform the source image
     warpPerspective(SOURCE_IMAGE, sourceWarped, homography, Size(512, 512));
+
+    //Save the data
+    destinationPoints.push_back(outputCenter);
     CAMERA_IMAGE_POINTS = destinationPoints;
     CAMERA_IMAGE = sourceWarped;
+
+    //Show the image
     imshow("Camera Image", sourceWarped);
 
     calcAffineTransformation(0, userdata);
@@ -203,6 +227,7 @@ static void calcAffineTransformation(int, void* userdata) {
     data = static_cast<Vec<void*, 4>*>(userdata);
     affineTrans = static_cast<Vec3i*>(data->val[3]);
 
+    //Filling the needed matriz
     scalingMat = (Mat_<double>(2, 2) <<
                             affineTrans->val[2], 0,
                             0,                   1);
@@ -213,13 +238,13 @@ static void calcAffineTransformation(int, void* userdata) {
                             cos(affineTrans->val[1] * PI / 180), -sin(affineTrans->val[1] * PI / 180),
                             sin(affineTrans->val[1] * PI / 180), cos(affineTrans->val[1] * PI / 180));
 
-    augmentedMat = scalingMat * rotMatBeta;
-    augmentedMat = -rotMatBeta * augmentedMat;
-    augmentedMat = rotMatAlpha * augmentedMat;
+    //Calculation for the augmented matrix
+    augmentedMat = rotMatAlpha * (-rotMatBeta * (scalingMat * rotMatBeta));
 
+    //Fill the transormation matrix
     transformMat = (Mat_<double>(3, 3) <<
-                            augmentedMat.at<double>(0, 0), augmentedMat.at<double>(0, 1), 1,
-                            augmentedMat.at<double>(1, 0), augmentedMat.at<double>(1, 1), 1,
+                            augmentedMat.at<double>(0, 0), augmentedMat.at<double>(0, 1), U0,
+                            augmentedMat.at<double>(1, 0), augmentedMat.at<double>(1, 1), V0,
                             0                            , 0                            , 1);
 
     //Fill the point vector from the image
@@ -235,8 +260,15 @@ static void calcAffineTransformation(int, void* userdata) {
         actualPoint.x = tempPoint.at<double>(0, 0) / tempPoint.at<double>(0, 2);
         actualPoint.y = tempPoint.at<double>(0, 1) / tempPoint.at<double>(0, 2);
 
-        destinationPoints.push_back(actualPoint);
+        if(c < CAMERA_IMAGE_POINTS.size() - 1)destinationPoints.push_back(actualPoint);
     }
+
+    Point2f outputCenter, centerOffset;
+    outputCenter = actualPoint;
+    centerOffset = outputCenter - Point2f(255, 255);
+
+    for(int c = 0; c < CAMERA_IMAGE_POINTS.size() - 1; c++)
+        destinationPoints.at(c) -= centerOffset;
 
     //Create homography
     homography = findHomography(SOURCE_POINTS_ORIG, destinationPoints, 0);
