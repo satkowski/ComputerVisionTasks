@@ -169,9 +169,9 @@ static void calcCameraImage(int, void* userdata) {
     //Centering of the image
     outputCenter = actualPoint;
     centerOffset = outputCenter - Point2f(255, 255);
-
     for(int c = 0; c < SOURCE_POINTS_SHIFT.size() - 1; c++)
         destinationPoints.at(c) -= centerOffset;
+    outputCenter -= centerOffset;
 
     //Create homography
     homography = findHomography(SOURCE_POINTS_ORIG, destinationPoints, 0);
@@ -221,6 +221,8 @@ static void calcAffineTransformation(int, void* userdata) {
     Mat tempPoint = Mat_<double>(3, 1);
     vector<Point2f> destinationPoints;
 
+    Point2f outputCenter, centerOffset;
+
     Mat homography, sourceWarped;
 
     //Cast of the userdata
@@ -260,13 +262,12 @@ static void calcAffineTransformation(int, void* userdata) {
         actualPoint.x = tempPoint.at<double>(0, 0) / tempPoint.at<double>(0, 2);
         actualPoint.y = tempPoint.at<double>(0, 1) / tempPoint.at<double>(0, 2);
 
-        if(c < CAMERA_IMAGE_POINTS.size() - 1)destinationPoints.push_back(actualPoint);
+        if(c < CAMERA_IMAGE_POINTS.size() - 1)  destinationPoints.push_back(actualPoint);
     }
 
-    Point2f outputCenter, centerOffset;
+    //Centering of the image
     outputCenter = actualPoint;
     centerOffset = outputCenter - Point2f(255, 255);
-
     for(int c = 0; c < CAMERA_IMAGE_POINTS.size() - 1; c++)
         destinationPoints.at(c) -= centerOffset;
 
