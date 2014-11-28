@@ -29,8 +29,10 @@ static Mat INTRINSIC_CAM_PAR_MAT = Mat_<double>(3, 3);
 //Method that fill all variables
 void fillVariables(Mat& rotMat);
 
-//Method that calculate all the transformation
-static void onTrackbar(int, void* userdata);
+//Method that calculate both transformations
+static void onTrackbarCam(int, void* userdata);
+//Method that calculate the affine transformation
+static void onTrackbarAff(int, void* userdata);
 //Method that calculate the new rotation matrix
 static void onTrackbarRotMat(int, void* userdata);
 

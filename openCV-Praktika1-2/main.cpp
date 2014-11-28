@@ -37,13 +37,13 @@ int main( int argc, const char** argv ) {
     namedWindow("Camera Image");
 
     //Adding the trackbars for the spherical coordinates
-    createTrackbar("radius", "Camera Image", &(spherCoord.val[0]), ALPHA * 15, onTrackbar, &data);
+    createTrackbar("radius", "Camera Image", &(spherCoord.val[0]), ALPHA * 15, onTrackbarCam, &data);
     createTrackbar("theta ", "Camera Image", &(spherCoord.val[1]), 90, onTrackbarRotMat, &data);
     createTrackbar("rho   ", "Camera Image", &(spherCoord.val[2]), 360, onTrackbarRotMat, &data);
     //Adding the trackbars for the affine transformation
-    createTrackbar("alpha", "Affine Transformation", &(affineTrans.val[0]), 360, onTrackbar, &data);
-    createTrackbar("beta ", "Affine Transformation", &(affineTrans.val[1]), 360, onTrackbar, &data);
-    createTrackbar("lamda", "Affine Transformation", &(affineTrans.val[2]), 15, onTrackbar, &data);
+    createTrackbar("alpha", "Affine Transformation", &(affineTrans.val[0]), 360, onTrackbarAff, &data);
+    createTrackbar("beta ", "Affine Transformation", &(affineTrans.val[1]), 360, onTrackbarAff, &data);
+    createTrackbar("lamda", "Affine Transformation", &(affineTrans.val[2]), 15, onTrackbarAff, &data);
 
     waitKey();
     return 0;
@@ -51,12 +51,16 @@ int main( int argc, const char** argv ) {
 
 
 
-static void onTrackbar(int, void* userdate) {
+static void onTrackbarCam(int, void* userdate) {
     calcCameraPosition(0, userdate);
     calcCameraImage(0, userdate);
     calcAffineTransformation(0, userdate);
 
     imshow("Camera Image", CAMERA_IMAGE);
+    imshow("Affine Transformation", AFFINE_IMAGE);
+}
+static void onTrackbarAff(int, void* userdata) {
+    calcAffineTransformation(0, userdata);
     imshow("Affine Transformation", AFFINE_IMAGE);
 }
 static void onTrackbarRotMat(int, void* userdata) {
@@ -94,7 +98,7 @@ static void onTrackbarRotMat(int, void* userdata) {
     *rotMat = (rotMatZ * rotMatY);
 
     //Calling the camera position method
-    onTrackbar(0, userdata);
+    onTrackbarCam(0, userdata);
 }
 
 
