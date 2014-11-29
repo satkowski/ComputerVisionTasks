@@ -10,7 +10,7 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
+    keyMap = "{path     |   |../Bilder/62962.jpg }"
              "{filter   |1  |2                               }";
 
     //Reading the Callingarguments
@@ -31,6 +31,8 @@ int main( int argc, const char** argv ) {
     data->val[1] = &image;
 
     //Creating windows for the images
+    namedWindow("Original Image", 0);
+    imshow("Original Image", image);
     namedWindow("Filtered Image", 0);
 
     setFilter(filter, windowSize, data, image, outputImage);

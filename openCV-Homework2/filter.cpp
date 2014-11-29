@@ -133,14 +133,17 @@ Mat medianFilter(int w, Mat *input) {
 
 Mat sobelFilter(Mat *input) {
     /*------------- initialization ------------*/
-    Mat horizontalSobel, verticalSobel;
+    Mat horizontalSobelX, verticalSobelX, horizontalSobelY, verticalSobelY;
     Mat tempInput, output;
-    Mat actualSobel, actualPixel;
+    Mat actualWindow, actualPixelX, actualPixelY;
+    double actualPixel;
     /*-----------------------------------------*/
 
-    horizontalSobel = (Mat_<double>(1, 3) << -.5, 0, .5);
-    verticalSobel = (Mat_<double>(3, 1) << .25, .5, .25);
-    actualPixel = Mat_<double>(1, 1);
+    horizontalSobelX = (Mat_<double>(1, 3) << .5, 0, -.5);
+    verticalSobelX = (Mat_<double>(3, 1) << .25, .5, .25);
+    horizontalSobelY = (Mat_<double>(1, 3) << .25, .5, .25);
+    verticalSobelY = (Mat_<double>(3, 1) << .5, 0, -.5);
+    actualPixelX = Mat_<double>(1, 1);
 
     //Converts the image into a b/w one
     cvtColor(*input, tempInput, CV_BGR2GRAY);
@@ -150,14 +153,17 @@ Mat sobelFilter(Mat *input) {
     for(int cY = 1; cY < tempInput.rows - 1; cY++) {
         for(int cX = 1; cX < tempInput.cols - 1; cX++) {
             //Get the pixel around the actual one
-            actualSobel = (Mat_<double>(3, 3) <<
+            actualWindow = (Mat_<double>(3, 3) <<
                            tempInput.at<uchar>(cY - 1, cX - 1), tempInput.at<uchar>(cY - 1, cX), tempInput.at<uchar>(cY - 1, cX + 1),
                            tempInput.at<uchar>(cY    , cX - 1), tempInput.at<uchar>(cY    , cX), tempInput.at<uchar>(cY    , cX + 1),
                            tempInput.at<uchar>(cY + 1, cX - 1), tempInput.at<uchar>(cY + 1, cX), tempInput.at<uchar>(cY + 1, cX + 1));
             //Multipli that pixel with the sobel vectors
-            actualPixel = horizontalSobel * (actualSobel * verticalSobel);
+            actualPixelX = horizontalSobelX * (actualWindow * verticalSobelX);
+            actualPixelY = horizontalSobelY * (actualWindow * verticalSobelY);
+            actualPixel = sqrt(actualPixelX.at<double>(0, 0) * actualPixelX.at<double>(0, 0) +
+                               actualPixelY.at<double>(0, 0) * actualPixelY.at<double>(0, 0));
             //Add the new pixel value to the output
-            output.at<uchar>(cY - 1, cX - 1) = actualPixel.at<double>(0, 0);
+            output.at<uchar>(cY - 1, cX - 1) = actualPixel;
         }
     }
     return output;
