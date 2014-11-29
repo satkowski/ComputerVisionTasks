@@ -9,9 +9,9 @@ using namespace std;
 using namespace cv;
 
 //Method for the mean filter
-void meanFilter(int w, Mat* input);
+Mat meanFilter(int w, Mat* input);
 
 //Method for the median filter
-void medianFilter(int w, Mat* input);
+Mat medianFilter(int w, Mat* input);
 
 #endif // FILTER_H

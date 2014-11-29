@@ -6,7 +6,6 @@
 #include "opencv2/calib3d/calib3d.hpp"
 
 #include <stdio.h>
-#include <iostream>
 
 #define PI 3.14159265
 

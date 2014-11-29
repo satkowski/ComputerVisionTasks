@@ -8,7 +8,7 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/Unbenannt.jpg }"
+    keyMap = "{path     |   |../Bilder/62962.jpg }"
              "{filter   |1  |1                               }";
 
     //Reading the Callingarguments
@@ -35,7 +35,7 @@ int main( int argc, const char** argv ) {
 //    imshow("Original Image", image);
 
     //Adding the area trackbar to the window
-    createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols > image.rows) ? image.cols - 1 : image.rows - 1, filterSelect, data);
+    createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols < image.rows) ? image.cols / 2 - 1 : image.rows / 2 - 1, filterSelect, data);
 
     waitKey();
     return 0;
@@ -47,18 +47,17 @@ static void filterSelect(int windowSize, void* userdata) {
     int* filter = static_cast<int*>(data->val[0]);
     Mat* image = static_cast<Mat*>(data->val[1]);
     Mat outputImage;
-    image->copyTo(outputImage);
 
     //Decesion which filter should be choosed
     switch(*filter) {
     case 0:
-        meanFilter(windowSize, &outputImage);
+        outputImage = meanFilter(windowSize, image);
         break;
     case 1:
-        medianFilter(windowSize, &outputImage);
+        outputImage = medianFilter(windowSize, image);
         break;
     default:
-        meanFilter(windowSize, &outputImage);
+        outputImage = meanFilter(windowSize, image);
         break;
     }
 

@@ -79,11 +79,11 @@ static void onTrackbarRotMat(int, void* userdata) {
     rotMat = static_cast<Mat*>(data->val[2]);
 
     //Filling the rotation matrix
-//    //Rotationmatrix for the rotation on the x axis - using rho
-//    rotMatX = (Mat_<double>(3, 3) <<
-//              1,    0,                                   0,
-//              0,    cos(spherCoord->val[1] * PI / 180), -sin(spherCoord->val[1] * PI / 180),
-//              0,    sin(spherCoord->val[1] * PI / 180),  cos(spherCoord->val[1] * PI / 180));
+    //Rotationmatrix for the rotation on the x axis - using rho
+    rotMatX = (Mat_<double>(3, 3) <<
+              1,    0,                                   0,
+              0,    cos(spherCoord->val[1] * PI / 180), -sin(spherCoord->val[1] * PI / 180),
+              0,    sin(spherCoord->val[1] * PI / 180),  cos(spherCoord->val[1] * PI / 180));
     //Rotationmatrix for the rotation on the y axis - using rho
     rotMatY = (Mat_<double>(3, 3) <<
               cos(spherCoord->val[1] * PI / 180),   0,  sin(spherCoord->val[1] * PI / 180),
@@ -95,7 +95,8 @@ static void onTrackbarRotMat(int, void* userdata) {
               sin(spherCoord->val[2] * PI / 180),     cos(spherCoord->val[2] * PI / 180),   0,
               0,                                      0,                                    1);
 
-    *rotMat = (rotMatZ * rotMatY);
+    *rotMat = rotMatZ * (((cos(spherCoord->val[2] * PI / 180) * rotMatX)) + (1 - (cos(spherCoord->val[2] * PI / 180)) * rotMatY));
+//    *rotMat = rotMatZ * rotMatY;
 
     //Calling the camera position method
     onTrackbarCam(0, userdata);
@@ -123,7 +124,6 @@ void calcCameraPosition(int, void* userdata) {
     camPos->y = lengthOnXY * sin(spherCoord->val[2] * PI / 180);
     //Calculate the coordinate on the z axis with theta
     camPos->z = spherCoord->val[0] * cos(spherCoord->val[1] * PI / 180);
-    std::cout << *camPos << std::endl;
 }
 void calcCameraImage(int, void* userdata) {
     /*------------- initialization ------------*/
