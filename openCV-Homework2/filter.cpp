@@ -139,10 +139,10 @@ Mat sobelFilter(Mat *input) {
     double actualPixel;
     /*-----------------------------------------*/
 
-    horizontalSobelX = (Mat_<double>(1, 3) << .5, 0, -.5);
+    horizontalSobelX = (Mat_<double>(1, 3) << -.5, 0, .5);
     verticalSobelX = (Mat_<double>(3, 1) << .25, .5, .25);
     horizontalSobelY = (Mat_<double>(1, 3) << .25, .5, .25);
-    verticalSobelY = (Mat_<double>(3, 1) << .5, 0, -.5);
+    verticalSobelY = (Mat_<double>(3, 1) << -.5, 0, .5);
     actualPixelX = Mat_<double>(1, 1);
 
     //Converts the image into a b/w one
@@ -157,9 +157,10 @@ Mat sobelFilter(Mat *input) {
                            tempInput.at<uchar>(cY - 1, cX - 1), tempInput.at<uchar>(cY - 1, cX), tempInput.at<uchar>(cY - 1, cX + 1),
                            tempInput.at<uchar>(cY    , cX - 1), tempInput.at<uchar>(cY    , cX), tempInput.at<uchar>(cY    , cX + 1),
                            tempInput.at<uchar>(cY + 1, cX - 1), tempInput.at<uchar>(cY + 1, cX), tempInput.at<uchar>(cY + 1, cX + 1));
-            //Multipli that pixel with the sobel vectors
+            //Multiply that pixel with the sobel vectors for the x and y gradiant
             actualPixelX = horizontalSobelX * (actualWindow * verticalSobelX);
             actualPixelY = horizontalSobelY * (actualWindow * verticalSobelY);
+            //Combine both gradiant
             actualPixel = sqrt(actualPixelX.at<double>(0, 0) * actualPixelX.at<double>(0, 0) +
                                actualPixelY.at<double>(0, 0) * actualPixelY.at<double>(0, 0));
             //Add the new pixel value to the output
