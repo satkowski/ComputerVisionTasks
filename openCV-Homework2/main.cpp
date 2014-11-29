@@ -1,15 +1,17 @@
 #include <main.h>
 
 int main( int argc, const char** argv ) {
+    /*------------- initialization ------------*/
     String filename;
     int filter, windowSize = 0;
     Mat image, outputImage;
     Vec<void*, 2>* data;
+    /*-----------------------------------------*/
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/62962.jpg }"
-             "{filter   |1  |1                               }";
+    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
+             "{filter   |1  |2                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -42,11 +44,16 @@ int main( int argc, const char** argv ) {
 }
 
 static void filterSelect(int windowSize, void* userdata) {
-    //Cast all variables
-    Vec<void*, 3>* data = static_cast<Vec<void*, 3>*>(userdata);
-    int* filter = static_cast<int*>(data->val[0]);
-    Mat* image = static_cast<Mat*>(data->val[1]);
+    /*------------- initialization ------------*/
+    Vec<void*, 3>* data;
+    int* filter;
+    Mat* image;
     Mat outputImage;
+    /*-----------------------------------------*/
+    //Cast all variables
+    data = static_cast<Vec<void*, 3>*>(userdata);
+    filter = static_cast<int*>(data->val[0]);
+    image = static_cast<Mat*>(data->val[1]);
 
     //Decesion which filter should be choosed
     switch(*filter) {
@@ -55,6 +62,9 @@ static void filterSelect(int windowSize, void* userdata) {
         break;
     case 1:
         outputImage = medianFilter(windowSize, image);
+        break;
+    case 2:
+        outputImage = sobelFilter(image);
         break;
     default:
         outputImage = meanFilter(windowSize, image);

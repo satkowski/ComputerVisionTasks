@@ -1,7 +1,9 @@
 #include <multiset.h>
 
 bool compValue::operator()(const Vec3d& left,const Vec3d& right) const{
+    /*------------- initialization ------------*/
     float leftSum, rightSum;
+    /*-----------------------------------------*/
 
     //Calculate the distance of the vectors
     leftSum = sqrt(left.val[0] * left.val[0] +

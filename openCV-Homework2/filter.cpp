@@ -5,9 +5,13 @@ Mat meanFilter(int w, Mat* input) {
     if(w == 0)
         return *input;
 
-    int i, j, wArea = (2*w + 1)*(2*w +1);
+    /*------------- initialization ------------*/
+    int i, j, wArea;
     Mat temp, output;
     Mat areas(input->rows + 2*w, input->cols + 2*w, CV_64FC3);
+    /*-----------------------------------------*/
+
+    wArea = (2*w + 1)*(2*w +1);
 
     //Convert the image
     input->convertTo(temp, CV_64FC3);
@@ -75,100 +79,19 @@ Mat meanFilter(int w, Mat* input) {
     return output;
 }
 
-//void medianFilter(int w, Mat* input) {
-//    //Show the original image
-//    if(w == 0)
-//        return;
-
-//    int i, j;
-//    Mat tempInput, tempOutput, output;
-//    Vec3dSet oldRowPixelSet, actualpixelSet;
-//    std::_Rb_tree_const_iterator<Vec3d> median;
-
-//    //Convert the image
-//    input->convertTo(tempInput, CV_64FC3);
-//    input->convertTo(tempOutput, CV_64FC3);
-
-//    for(int wY = - w; wY < w; wY++) {
-//        for(int wX = - w; wX < w; wX++) {
-//            actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
-//            //If wX == 0 the same column should be choosed again
-//            if(wX == 0)
-//                actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
-//            //If wY == 0 the same row should be choosed again
-//            if(wY == 0) {
-//                actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
-//                if(wX == 0)
-//                    actualpixelSet.insert(tempInput.at<Vec3d>(w - abs(wY), w - abs(wX)));
-//            }
-//        }
-//    }
-
-//    for(int cY = 0; cY < input->rows; cY++) {
-//        //Add the median of all pixels in the window to the new image
-//        median = actualpixelSet.begin();
-//        std::advance(median, actualpixelSet.size() / 2);
-//        tempOutput.at<Vec3d>(cY, 0) = *median;
-//        oldRowPixelSet = actualpixelSet;
-
-//        for(int cX = 1; cX < input->cols; cX++) {
-//            //Calculate the mirror coordinate
-//            if(cX + w >= input->cols)   i = (cX + w) - ((cX + w) - input->cols + 2);
-//            else                        i = (cX + w);
-
-//            //Erase the left pixel of the old window and add the right ones
-//            for(int wY = 0; wY <= 2*w; wY++) {
-//                //Calculate the mirror coordinate ------- Optimierung an der Stelle!!!
-//                if(cY + w - wY <= 0)                j = (cY + w - wY) * -1;
-//                else if(cY + w -wY >= input->rows)  j = (cY + w - wY) - ((cY + w - wY) - input->rows + 2);
-//                else                                j =  cY + w - wY;
-
-////                Vec3d test1 = tempInput.at<Vec3d>(j, abs(cX - w));
-////                std::_Rb_tree_const_iterator<Vec3d> test2 = actualpixelSet.find(tempInput.at<Vec3d>(j, abs(cX - w)));
-//                actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(j, abs(cX - w - 1))));
-//                actualpixelSet.insert(tempInput.at<Vec3d>(j, i));
-//            }
-
-//            //Add the median of all pixels in the window to the new image
-//            median = actualpixelSet.begin();
-//            std::advance(median, actualpixelSet.size() / 2);
-////
-/// Vec3d test3 = *median;
-//            tempOutput.at<Vec3d>(cY, cX) = *median;
-//        }
-//        if(cY == input->rows - 1)
-//            continue;
-
-//        //Calculate the mirror coordinate
-//        if(cY + 1 + w >= input->rows)   j = (cY + 1 + w) - ((cY + 1 + w) - input->rows + 2);
-//        else                            j = (cY + 1 + w);
-
-//        actualpixelSet = oldRowPixelSet;
-//        //Erase the upper pixel of the old window and add the lower ones
-//        for(int wX = 0; wX <= 2*w; wX++) {
-//            //Calculate the mirror coordinate
-//            i = abs(w - wX);
-
-//            actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(abs(cY - w), i)));
-//            actualpixelSet.insert(tempInput.at<Vec3d>(j, i));
-//        }
-//    }
-//    //Convert the image back
-//    tempOutput.convertTo(output, CV_8UC3);
-//    *input = output;
-//}
-
 Mat medianFilter(int w, Mat *input) {
     //Show the original image
     if(w == 0)
         return *input;
 
-    Mat tempInput, output;
+    /*------------- initialization ------------*/
+    Mat tempInput, tempOutput, output;
     Vec3dSet oldRowPixelSet, actualpixelSet;
     std::_Rb_tree_const_iterator<Vec3d> median;
+    /*-----------------------------------------*/
 
     input->convertTo(tempInput, CV_64FC3);
-    Mat tempOutput = Mat(tempInput.rows - 2*w, tempInput.cols - 2*w, CV_64FC3);
+    tempOutput = Mat(tempInput.rows - 2*w, tempInput.cols - 2*w, CV_64FC3);
 
     for(int wY = 0; wY < 2*w + 1; wY++) {
         for(int wX = 0; wX < 2*w + 1; wX++) {
@@ -205,5 +128,37 @@ Mat medianFilter(int w, Mat *input) {
         }
     }
     tempOutput.convertTo(output, CV_8UC3);
+    return output;
+}
+
+Mat sobelFilter(Mat *input) {
+    /*------------- initialization ------------*/
+    Mat horizontalSobel, verticalSobel;
+    Mat tempInput, output;
+    Mat actualSobel, actualPixel;
+    /*-----------------------------------------*/
+
+    horizontalSobel = (Mat_<double>(1, 3) << -.5, 0, .5);
+    verticalSobel = (Mat_<double>(3, 1) << .25, .5, .25);
+    actualPixel = Mat_<double>(1, 1);
+
+    //Converts the image into a b/w one
+    cvtColor(*input, tempInput, CV_BGR2GRAY);
+    output = Mat_<uchar>(tempInput.rows - 2, tempInput.cols - 2);
+
+    //Iterate over all pixel in the image
+    for(int cY = 1; cY < tempInput.rows - 1; cY++) {
+        for(int cX = 1; cX < tempInput.cols - 1; cX++) {
+            //Get the pixel around the actual one
+            actualSobel = (Mat_<double>(3, 3) <<
+                           tempInput.at<uchar>(cY - 1, cX - 1), tempInput.at<uchar>(cY - 1, cX), tempInput.at<uchar>(cY - 1, cX + 1),
+                           tempInput.at<uchar>(cY    , cX - 1), tempInput.at<uchar>(cY    , cX), tempInput.at<uchar>(cY    , cX + 1),
+                           tempInput.at<uchar>(cY + 1, cX - 1), tempInput.at<uchar>(cY + 1, cX), tempInput.at<uchar>(cY + 1, cX + 1));
+            //Multipli that pixel with the sobel vectors
+            actualPixel = horizontalSobel * (actualSobel * verticalSobel);
+            //Add the new pixel value to the output
+            output.at<uchar>(cY - 1, cX - 1) = actualPixel.at<double>(0, 0);
+        }
+    }
     return output;
 }
