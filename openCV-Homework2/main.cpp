@@ -26,21 +26,32 @@ int main( int argc, const char** argv ) {
     }
     image.copyTo(outputImage);
 
+    //Filling the data pointer
     data->val[0] = &filter;
     data->val[1] = &image;
 
     //Creating windows for the images
     namedWindow("Filtered Image", 0);
-    imshow("Filtered Image", outputImage);
 
-//    namedWindow("Original Image", 0);
-//    imshow("Original Image", image);
-
-    //Adding the area trackbar to the window
-    createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols < image.rows) ? image.cols / 2 - 1 : image.rows / 2 - 1, filterSelect, data);
+    setFilter(filter, windowSize, data, image, outputImage);
 
     waitKey();
     return 0;
+}
+
+void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& outputImage) {
+    switch(filter) {
+    case 2:
+        outputImage = sobelFilter(&image);
+        break;
+    default:
+        //Adding the area trackbar to the window
+        createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols < image.rows) ? image.cols / 2 - 1 : image.rows / 2 - 1, filterSelect, data);
+        break;
+    }
+
+    //Show the image
+    imshow("Filtered Image", outputImage);
 }
 
 static void filterSelect(int windowSize, void* userdata) {
@@ -62,12 +73,6 @@ static void filterSelect(int windowSize, void* userdata) {
         break;
     case 1:
         outputImage = medianFilter(windowSize, image);
-        break;
-    case 2:
-        outputImage = sobelFilter(image);
-        break;
-    default:
-        outputImage = meanFilter(windowSize, image);
         break;
     }
 
