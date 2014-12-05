@@ -10,8 +10,8 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/62962.jpg }"
-             "{filter   |1  |2                               }";
+    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
+             "{filter   |1  |1                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -43,7 +43,7 @@ int main( int argc, const char** argv ) {
 
 void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& outputImage) {
     switch(filter) {
-    case 2:
+    case 3:
         outputImage = sobelFilter(&image);
         break;
     default:
@@ -74,7 +74,10 @@ static void filterSelect(int windowSize, void* userdata) {
         outputImage = meanFilter(windowSize, image);
         break;
     case 1:
-        outputImage = medianFilter(windowSize, image);
+        outputImage = medianFilterTwoSets(windowSize, image);
+        break;
+    case 2:
+        outputImage = medianFilterOneSet(windowSize, image);
         break;
     }
 
