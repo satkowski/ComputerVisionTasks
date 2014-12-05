@@ -8,6 +8,8 @@ QT       += core
 
 QT       -= gui
 
+QMAKE_CXXFLAGS = -std=c++11
+
 TARGET = Homework_2
 CONFIG   += console
 CONFIG   -= app_bundle

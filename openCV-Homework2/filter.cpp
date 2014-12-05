@@ -155,6 +155,7 @@ Mat medianFilterTwoSets(int w, Mat *input) {
     }
     oldRowLowerHalf = lowerHalf;
 
+    auto begin = std::chrono::high_resolution_clock::now();
     for(int cY = w; cY < tempInput.rows - w; cY++) {
         //Add and delte Pixel
         for(int wX = -w; wX <= w && cY != w; wX++) {
@@ -239,7 +240,14 @@ Mat medianFilterTwoSets(int w, Mat *input) {
             }
             median = *(--lowerHalf.end());
             tempOutput.at<Vec3d>(cY - w, cX - w) = median;
+//            auto elapsed = std::chrono::high_resolution_clock::now() - begin;
+//            long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+//            std::cout << "Time at " << cY << "," << cX << ":    " << double(microseconds) / 1000000 << std::endl;
         }
+        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
+        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
+//        std::cout << "-------------------" << std::endl;
     }
     tempOutput.convertTo(output, CV_8UC3);
     return output;
