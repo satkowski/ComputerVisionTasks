@@ -99,13 +99,11 @@ Mat medianFilterOneSet(int w, Mat *input) {
     }
     oldRowPixelSet = actualpixelSet;
 
+    auto begin = std::chrono::high_resolution_clock::now();
     for(int cY = w; cY < tempInput.rows - w; cY++) {
-        for(int wX = 0; wX <= w && cY != w; wX++) {
+        for(int wX = -w; wX <= w && cY != w; wX++) {
             oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w + wX)));
             oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w + wX));
-            if(wX == 0) continue;
-            oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w - wX)));
-            oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w - wX));
         }
         actualpixelSet = oldRowPixelSet;
 
@@ -114,17 +112,17 @@ Mat medianFilterOneSet(int w, Mat *input) {
         tempOutput.at<Vec3d>(cY - w, 0) = *median;
 
         for(int cX = w + 1; cX < tempInput.cols - w; cX++) {
-            for(int wY = 0; wY <= w; wY++) {
+            for(int wY = -w; wY <= w; wY++) {
                 actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY + wY, cX - w - 1)));
                 actualpixelSet.insert(tempInput.at<Vec3d>(cY + wY, cX + w));
-                if(wY == 0) continue;
-                actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY - wY, cX - w - 1)));
-                actualpixelSet.insert(tempInput.at<Vec3d>(cY - wY, cX + w));
             }
             median = actualpixelSet.begin();
             std::advance(median, actualpixelSet.size() / 2);
             tempOutput.at<Vec3d>(cY - w, cX - w) = *median;
         }
+        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
+        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
     }
     tempOutput.convertTo(output, CV_8UC3);
     return output;
