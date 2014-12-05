@@ -82,48 +82,53 @@ Mat meanFilter(int w, Mat* input) {
 Mat medianFilterOneSet(int w, Mat *input) {
     //Show the original image
     if(w == 0)
-    return *input;
+        return *input;
+
     /*------------- initialization ------------*/
     Mat tempInput, tempOutput, output;
     Vec3dSet oldRowPixelSet, actualpixelSet;
     std::_Rb_tree_const_iterator<Vec3d> median;
     /*-----------------------------------------*/
+
     input->convertTo(tempInput, CV_64FC3);
     tempOutput = Mat(tempInput.rows - 2*w, tempInput.cols - 2*w, CV_64FC3);
+
     for(int wY = 0; wY < 2*w + 1; wY++) {
-    for(int wX = 0; wX < 2*w + 1; wX++) {
-    actualpixelSet.insert(tempInput.at<Vec3d>(wY, wX));
-    }
+        for(int wX = 0; wX < 2*w + 1; wX++)
+          actualpixelSet.insert(tempInput.at<Vec3d>(wY, wX));
     }
     oldRowPixelSet = actualpixelSet;
+
     for(int cY = w; cY < tempInput.rows - w; cY++) {
-    for(int wX = 0; wX <= w && cY != w; wX++) {
-    oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w + wX)));
-    oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w + wX));
-    if(wX == 0) continue;
-    oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w - wX)));
-    oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w - wX));
-    }
-    actualpixelSet = oldRowPixelSet;
-    median = actualpixelSet.begin();
-    std::advance(median, actualpixelSet.size() / 2);
-    tempOutput.at<Vec3d>(cY - w, 0) = *median;
-    for(int cX = w + 1; cX < tempInput.cols - w; cX++) {
-    for(int wY = 0; wY <= w; wY++) {
-    actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY + wY, cX - w - 1)));
-    actualpixelSet.insert(tempInput.at<Vec3d>(cY + wY, cX + w));
-    if(wY == 0) continue;
-    actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY - wY, cX - w - 1)));
-    actualpixelSet.insert(tempInput.at<Vec3d>(cY - wY, cX + w));
-    }
-    median = actualpixelSet.begin();
-    std::advance(median, actualpixelSet.size() / 2);
-    tempOutput.at<Vec3d>(cY - w, cX - w) = *median;
-    }
+        for(int wX = 0; wX <= w && cY != w; wX++) {
+            oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w + wX)));
+            oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w + wX));
+            if(wX == 0) continue;
+            oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w - wX)));
+            oldRowPixelSet.insert(tempInput.at<Vec3d>(cY + w, w - wX));
+        }
+        actualpixelSet = oldRowPixelSet;
+
+        median = actualpixelSet.begin();
+        std::advance(median, actualpixelSet.size() / 2);
+        tempOutput.at<Vec3d>(cY - w, 0) = *median;
+
+        for(int cX = w + 1; cX < tempInput.cols - w; cX++) {
+            for(int wY = 0; wY <= w; wY++) {
+                actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY + wY, cX - w - 1)));
+                actualpixelSet.insert(tempInput.at<Vec3d>(cY + wY, cX + w));
+                if(wY == 0) continue;
+                actualpixelSet.erase(actualpixelSet.find(tempInput.at<Vec3d>(cY - wY, cX - w - 1)));
+                actualpixelSet.insert(tempInput.at<Vec3d>(cY - wY, cX + w));
+            }
+            median = actualpixelSet.begin();
+            std::advance(median, actualpixelSet.size() / 2);
+            tempOutput.at<Vec3d>(cY - w, cX - w) = *median;
+        }
     }
     tempOutput.convertTo(output, CV_8UC3);
     return output;
-    }
+}
 
 Mat medianFilterTwoSets(int w, Mat *input) {
     //Show the original image
