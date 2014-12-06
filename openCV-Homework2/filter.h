@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#define k 0.04
+
 using namespace std;
 using namespace cv;
 

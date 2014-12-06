@@ -300,6 +300,7 @@ Mat harrisCornerDetector(int w, Mat* input) {
     Mat harrisMat, newAMat;
     Mat sumSquDiffTemp, sumSquDiffMat;
     Mat horizontalShift, verticalShift;
+    double actualValue;
     /*-----------------------------------------*/
 
     //Convert the image to an image with double pixels
@@ -326,13 +327,13 @@ Mat harrisCornerDetector(int w, Mat* input) {
     //Calculate the a matrix
     for(int cY = 0; cY < harrisMat.rows; cY++) {
         for(int cX = 0; cX < harrisMat.cols; cX++) {
-            //Fill the a matrix
-            newAMat = (Mat_<double>(2, 2) <<
-                       partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),
-                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
-                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
-                       partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));
-            harrisMat += newAMat;
+//            //Fill the a matrix
+//            newAMat = (Mat_<double>(2, 2) <<
+//                       partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),
+//                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+//                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+//                       partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));
+//            harrisMat += newAMat;
         }
     }
     //Calculate every S
@@ -341,14 +342,28 @@ Mat harrisCornerDetector(int w, Mat* input) {
             //Iterate through all possible shifts in the window
             for(int wY = -w; wY <= w; wY++) {
                 for(int wX = -w; wX <= w; wX++) {
-                    horizontalShift = (Mat_<double>(1, 2) << wX, wY);
-                    verticalShift = (Mat_<double>(2, 1) << wX, wY);
+                    harrisMat = (Mat_<double>(2, 2) << 0, 0, 0, 0);
+                    //Fill the a matrix
+                    newAMat = (Mat_<double>(2, 2) <<
+                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivX.at<double>(cY + wY, cX + wX),
+                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX),
+                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX),
+                               partDerivY.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX));
+                    harrisMat += newAMat;
+//                    horizontalShift = (Mat_<double>(1, 2) << wX, wY);
+//                    verticalShift = (Mat_<double>(2, 1) << wX, wY);
 
-                    sumSquDiffTemp = (horizontalShift * harrisMat) * verticalShift;
-                    sumSquDiffMat.at<double>(wY + w, wX + w) = sumSquDiffTemp.at<double>(0, 0);
+//                    sumSquDiffTemp = (horizontalShift * harrisMat) * verticalShift;
+//                    sumSquDiffMat.at<double>(wY + w, wX + w) = sumSquDiffTemp.at<double>(0, 0);
                 }
             }
-
+            actualValue = (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) -
+                           harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) -
+                           k *
+                         ((harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) *
+                           harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) *
+                          (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) *
+                           harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)));
         }
     }
 }
