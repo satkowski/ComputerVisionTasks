@@ -295,7 +295,7 @@ Mat sobelFilter(Mat *input) {
 
 Mat harrisCornerDetector(int w, Mat* input) {
     /*------------- initialization ------------*/
-    Mat tempInput, interestPoints;
+    Mat tempInput, interestPoints, output;
     Mat partDerivX, partDerivY;
     Mat harrisMat, newAMat;
     Mat sumSquDiffTemp, sumSquDiffMat;
@@ -306,6 +306,7 @@ Mat harrisCornerDetector(int w, Mat* input) {
     //Convert the image to an image with double pixels
     cvtColor(*input, tempInput, CV_BGR2GRAY);
     interestPoints = Mat_<bool>(tempInput.rows, tempInput.cols);
+    input->copyTo(output);
 
     partDerivX = Mat(tempInput.rows, tempInput.cols - 2, CV_64F);
     partDerivY = Mat(tempInput.rows - 2, tempInput.cols, CV_64F);
@@ -364,6 +365,15 @@ Mat harrisCornerDetector(int w, Mat* input) {
                            harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) *
                           (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) *
                            harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)));
+
+//            //Save the found interest points
+//            if(actualValue > 20)
+//                interestPoints.at<bool>(cY, cX) = true;
+//            else
+//                interestPoints.at<bool>(cY, cX) = false;
+
+            circle(output, Point(cX, cY), 5, Scalar(0, 0, 255));
         }
     }
+    return output;
 }
