@@ -293,24 +293,23 @@ Mat sobelFilter(Mat *input) {
     return output;
 }
 
-Mat harrisCornerDetector(Mat* input) {
+Mat harrisCornerDetector(int w, Mat* input) {
     /*------------- initialization ------------*/
-    Mat tempInput;
+    Mat tempInput, interestPoints;
     Mat partDerivX, partDerivY;
-    Mat weightMat, aMat;
+    Mat harrisMat, newAMat;
+    Mat sumSquDiffTemp, sumSquDiffMat;
+    Mat horizontalShift, verticalShift;
     /*-----------------------------------------*/
 
     //Convert the image to an image with double pixels
     cvtColor(*input, tempInput, CV_BGR2GRAY);
+    interestPoints = Mat_<bool>(tempInput.rows, tempInput.cols);
 
     partDerivX = Mat(tempInput.rows, tempInput.cols - 2, CV_64F);
     partDerivY = Mat(tempInput.rows - 2, tempInput.cols, CV_64F);
 
-    //Fill weighted matrix for the window
-    weightMat = (Mat_<double>(3, 3) <<
-                 1/9, 1/9, 1/9,
-                 1/9, 1/9, 1/9,
-                 1/9, 1/9, 1/9);
+    sumSquDiffMat = Mat_<double>(2*w + 1, 2*w + 1);
 
     //Calculate partial derivative in x direction
     for(int cY = 0; cY < tempInput.rows; cY++) {
@@ -325,15 +324,31 @@ Mat harrisCornerDetector(Mat* input) {
         }
     }
     //Calculate the a matrix
-    for(int cY = 1; cY < aMat.rows - 1; cY++) {
-        for(int cX = 1; cX < aMat.cols - 1; cX++) {
+    for(int cY = 0; cY < harrisMat.rows; cY++) {
+        for(int cX = 0; cX < harrisMat.cols; cX++) {
             //Fill the a matrix
-            aMat = (Mat_<double>(2, 2) <<
-                    aMat.at<double>(0, 0) + partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),
-                    aMat.at<double>(0, 1) + partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
-                    aMat.at<double>(1, 0) + partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
-                    aMat.at<double>(1, 1) + partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));
+            newAMat = (Mat_<double>(2, 2) <<
+                       partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),
+                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+                       partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));
+            harrisMat += newAMat;
         }
     }
+    //Calculate every S
+    for(int cY = w + 1; cY < tempInput.rows - w - 1; cY++) {
+        for(int cX = w + 1; cX < tempInput.cols - w - 1; cX++) {
+            //Iterate through all possible shifts in the window
+            for(int wY = -w; wY <= w; wY++) {
+                for(int wX = -w; wX <= w; wX++) {
+                    horizontalShift = (Mat_<double>(1, 2) << wX, wY);
+                    verticalShift = (Mat_<double>(2, 1) << wX, wY);
 
+                    sumSquDiffTemp = (horizontalShift * harrisMat) * verticalShift;
+                    sumSquDiffMat.at<double>(wY + w, wX + w) = sumSquDiffTemp.at<double>(0, 0);
+                }
+            }
+
+        }
+    }
 }
