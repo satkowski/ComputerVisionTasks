@@ -20,5 +20,7 @@ Mat medianFilterOneSet(int w, Mat* input);
 Mat medianFilterTwoSets(int w, Mat* input);
 //Method for the sobel filter
 Mat sobelFilter(Mat* input);
+//Method for the harris corner detector
+Mat harrisCornerDetector(Mat* input);
 
 #endif // FILTER_H

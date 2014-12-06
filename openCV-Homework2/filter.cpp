@@ -143,9 +143,11 @@ Mat medianFilterTwoSets(int w, Mat *input) {
     compValue compare;
     /*-----------------------------------------*/
 
+    //Convert the image to an image with double pixels
     input->convertTo(tempInput, CV_64FC3);
     tempOutput = Mat(tempInput.rows - 2*w, tempInput.cols - 2*w, CV_64FC3);
 
+    //Fill the multisets for the first time
     for(int wY = 0; wY < 2*w + 1; wY++) {
         for(int wX = 0; wX < 2*w + 1; wX++) {
             lowerHalf.insert(tempInput.at<Vec3d>(wY, wX));
@@ -194,7 +196,7 @@ Mat medianFilterTwoSets(int w, Mat *input) {
         }
         lowerHalf = oldRowLowerHalf;
         upperHalf = oldRowUpperHalf;
-
+        //Add the median to the ouptput
         median = *(--lowerHalf.end());
         tempOutput.at<Vec3d>(cY - w, 0) = median;
 
@@ -236,6 +238,7 @@ Mat medianFilterTwoSets(int w, Mat *input) {
                     lowerHalf.erase(lowerHalf.find(element));
                 }
             }
+            //Add the median to the ouptput
             median = *(--lowerHalf.end());
             tempOutput.at<Vec3d>(cY - w, cX - w) = median;
 //            auto elapsed = std::chrono::high_resolution_clock::now() - begin;
@@ -288,4 +291,49 @@ Mat sobelFilter(Mat *input) {
         }
     }
     return output;
+}
+
+Mat harrisCornerDetector(Mat* input) {
+    /*------------- initialization ------------*/
+    Mat tempInput;
+    Mat partDerivX, partDerivY;
+    Mat weightMat, aMat;
+    /*-----------------------------------------*/
+
+    //Convert the image to an image with double pixels
+    cvtColor(*input, tempInput, CV_BGR2GRAY);
+
+    partDerivX = Mat(tempInput.rows, tempInput.cols - 2, CV_64F);
+    partDerivY = Mat(tempInput.rows - 2, tempInput.cols, CV_64F);
+
+    //Fill weighted matrix for the window
+    weightMat = (Mat_<double>(3, 3) <<
+                 1/9, 1/9, 1/9,
+                 1/9, 1/9, 1/9,
+                 1/9, 1/9, 1/9);
+
+    //Calculate partial derivative in x direction
+    for(int cY = 0; cY < tempInput.rows; cY++) {
+        for(int cX = 1; cX < tempInput.cols - 1; cX++) {
+            partDerivX.at<double>(cY, cX) = (tempInput.at<uchar>(cY, cX + 1) - tempInput.at<uchar>(cY, cX - 1)) / 2;
+        }
+    }
+    //Calculate partial derivative in y direction
+    for(int cX = 0; cX < tempInput.cols; cX++) {
+        for(int cY = 1; cY < tempInput.rows; cY++) {
+            partDerivY.at<double>(cY, cX) = (tempInput.at<uchar>(cY + 1, cX) - tempInput.at<uchar>(cY - 1, cX)) / 2;
+        }
+    }
+    //Calculate the a matrix
+    for(int cY = 1; cY < aMat.rows - 1; cY++) {
+        for(int cX = 1; cX < aMat.cols - 1; cX++) {
+            //Fill the a matrix
+            aMat = (Mat_<double>(2, 2) <<
+                    aMat.at<double>(0, 0) + partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),
+                    aMat.at<double>(0, 1) + partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+                    aMat.at<double>(1, 0) + partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),
+                    aMat.at<double>(1, 1) + partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));
+        }
+    }
+
 }
