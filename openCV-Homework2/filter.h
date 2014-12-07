@@ -6,10 +6,7 @@
 #include <multiset.h>
 #include <chrono>
 
-#include <stdio.h>
 #include <iostream>
-
-#define k 0.04
 
 using namespace std;
 using namespace cv;
@@ -22,7 +19,5 @@ Mat medianFilterOneSet(int w, Mat* input);
 Mat medianFilterTwoSets(int w, Mat* input);
 //Method for the sobel filter
 Mat sobelFilter(Mat* input);
-//Method for the harris corner detector
-Mat harrisCornerDetector(int w, Mat* input);
 
 #endif // FILTER_H

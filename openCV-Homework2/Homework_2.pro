@@ -19,11 +19,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     filter.cpp \
-    multiset.cpp
+    multiset.cpp \
+    harrisDetector.cpp
 
 # LIBS += -L/home/marc/Entwicklungsumgebungen/opencv-2.4.9/release/lib
 unix:!macx: LIBS += -lopencv_core -lopencv_calib3d -lopencv_contrib -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts
 
 HEADERS += main.h \
     filter.h \
-    multiset.h
+    multiset.h \
+    harrisDetector.h

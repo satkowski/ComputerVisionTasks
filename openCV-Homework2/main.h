@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include <filter.h>
+#include <harrisDetector.h>
 
 using namespace cv;
 

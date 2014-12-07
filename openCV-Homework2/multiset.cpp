@@ -1,6 +1,6 @@
 #include <multiset.h>
 
-bool compValue::operator()(const Vec3d& left,const Vec3d& right) const{
+bool compareRGB::operator()(const Vec3d& left,const Vec3d& right) const{
     /*------------- initialization ------------*/
     float leftSum, rightSum;
     /*-----------------------------------------*/
@@ -15,4 +15,8 @@ bool compValue::operator()(const Vec3d& left,const Vec3d& right) const{
 
     //Return if the left vector is less the right or not
     return leftSum < rightSum;
+}
+
+bool compareHarris::operator ()(const Vec3d& left, const Vec3d& right) const {
+    return left.val[2] > right.val[2];
 }

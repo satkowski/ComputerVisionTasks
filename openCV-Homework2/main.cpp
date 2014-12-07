@@ -10,7 +10,7 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
+    keyMap = "{path     |   |../Bilder/haus.jpg }"
              "{filter   |1  |3                               }";
 
     //Reading the Callingarguments
@@ -43,7 +43,7 @@ int main( int argc, const char** argv ) {
 
 void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& outputImage) {
     switch(filter) {
-    case 4:
+    case 5:
         outputImage = sobelFilter(&image);
         break;
     default:
@@ -80,7 +80,11 @@ static void filterSelect(int windowSize, void* userdata) {
         outputImage = medianFilterOneSet(windowSize, image);
         break;
     case 3:
-        outputImage = harrisCornerDetector(windowSize, image);
+        outputImage = harrisCornerDetector(windowSize, 0, image);
+        break;
+    case 4:
+        outputImage = harrisCornerDetector(windowSize, 1, image);
+        break;
     }
 
     //Show the new filtered image

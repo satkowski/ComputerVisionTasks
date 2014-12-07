@@ -8,13 +8,19 @@
 using namespace std;
 using namespace cv;
 
-//Struct for the comparsion in the multiset
-struct compValue {
-    //Using own comparsion method for the Vec3d
+//Struct for the comparsion in the multiset for RGB values
+struct compareRGB {
+    //Using own comparsion method
     bool operator()(const Vec3d& left,const Vec3d& right) const;
 };
 
-typedef std::multiset<Vec3d, compValue> Vec3dSet;
-typedef Vec<Vec3dSet, 2> Vec2Set;
+struct compareHarris {
+    //Using own comparsion method
+    bool operator()(const Vec3d& left,const Vec3d& right) const;
+};
+
+
+typedef std::multiset<Vec3d, compareRGB> Vec3dRGBSet;
+typedef std::multiset<Vec3d, compareHarris> Vec3dHarrisSet;
 
 #endif // MULTISET_H

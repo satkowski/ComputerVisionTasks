@@ -86,7 +86,7 @@ Mat medianFilterOneSet(int w, Mat *input) {
 
     /*------------- initialization ------------*/
     Mat tempInput, tempOutput, output;
-    Vec3dSet oldRowPixelSet, actualpixelSet;
+    Vec3dRGBSet oldRowPixelSet, actualpixelSet;
     std::_Rb_tree_const_iterator<Vec3d> median;
     /*-----------------------------------------*/
 
@@ -137,10 +137,10 @@ Mat medianFilterTwoSets(int w, Mat *input) {
     Mat tempInput, tempOutput, output;
     unsigned int diff;
     std::_Rb_tree_const_iterator<Vec3d> elemIter;
-    Vec3dSet lowerHalf, upperHalf;
-    Vec3dSet oldRowLowerHalf, oldRowUpperHalf;
+    Vec3dRGBSet lowerHalf, upperHalf;
+    Vec3dRGBSet oldRowLowerHalf, oldRowUpperHalf;
     Vec3d element, actualPixel, median;
-    compValue compare;
+    compareRGB compare;
     /*-----------------------------------------*/
 
     //Convert the image to an image with double pixels
@@ -288,88 +288,6 @@ Mat sobelFilter(Mat *input) {
                                actualPixelY.at<double>(0, 0) * actualPixelY.at<double>(0, 0));
             //Add the new pixel value to the output
             output.at<uchar>(cY - 1, cX - 1) = actualPixel;
-        }
-    }
-    return output;
-}
-
-Mat harrisCornerDetector(int w, Mat* input) {
-    /*------------- initialization ------------*/
-    Mat tempInput, output;
-    Mat partDerivX, partDerivY;
-    Mat harrisMat, harrisValueMat;
-    double harrisValue;
-    double maxHarrisValue;
-    Point maxHarrisPoint;
-    /*-----------------------------------------*/
-
-    //Convert the image to an image with double pixels
-    cvtColor(*input, tempInput, CV_BGR2GRAY);
-    input->copyTo(output);
-    harrisValueMat = Mat_<double>(tempInput.rows, tempInput.cols);
-
-    partDerivX = Mat(tempInput.rows, tempInput.cols, CV_64F);
-    partDerivY = Mat(tempInput.rows, tempInput.cols, CV_64F);
-
-    //Calculate gradient in x direction
-    for(int cY = 0; cY < tempInput.rows; cY++) {
-        for(int cX = 1; cX < tempInput.cols - 1; cX++) {
-            //( I(x + 1, y) - I(x - 1, y) ) / 2
-            partDerivX.at<double>(cY, cX) = (static_cast<double>(tempInput.at<uchar>(cY, cX + 1)) -
-                                             static_cast<double>(tempInput.at<uchar>(cY, cX - 1))) / 2;
-        }
-    }
-    //Calculate gradient in y direction
-    for(int cX = 0; cX < tempInput.cols; cX++) {
-        for(int cY = 1; cY < tempInput.rows - 1; cY++) {
-            //( I(x, y + 1) - I(x, y - 1) ) / 2
-            partDerivY.at<double>(cY, cX) = (static_cast<double>(tempInput.at<uchar>(cY + 1, cX)) -
-                                             static_cast<double>(tempInput.at<uchar>(cY - 1, cX))) / 2;
-        }
-    }
-
-
-    //Calculate the interest points
-    for(int cY = 1; cY < tempInput.rows - 1; cY++) {
-        for(int cX = 1; cX < tempInput.cols - 1; cX++) {
-            //Fill the harris matrix
-            harrisMat = (Mat_<double>(2, 2) <<
-                       partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),   //I of x square
-                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),   //I of x times I of y
-                       partDerivY.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),   //I of y times I of x
-                       partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));  //I of y square
-            //Calc the harris value
-            harrisValue = (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) -
-                           harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) -   //det(harrisMat)
-                           k *
-                         ((harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)) *
-                          (harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)));   //trace(harrisMat) square
-            harrisValue = abs(harrisValue);
-            //Threshold for the harris value
-            if(harrisValue > 50)
-                harrisValueMat.at<double>(cY, cX) = harrisValue;
-            else
-                harrisValueMat.at<double>(cY, cX) = 0;
-
-        }
-    }
-
-    //Non max suppresion on the harris value
-    for(int cY = w; cY < harrisValueMat.rows - w; cY++) {
-        for(int cX = w; cX < harrisValueMat.cols - w; cX++) {
-            maxHarrisValue = 0;
-            //Iterate through the window and search the biggest harris value
-            for(int wY = -w; wY <= w; wY++) {
-                for(int wX = -w; wX <= w; wX++) {
-                    //Set the new maximum
-                    if(maxHarrisValue < harrisValueMat.at<double>(cY + wY, cX + wX)) {
-                        maxHarrisValue = harrisValueMat.at<double>(cY + wY, cX + wX);
-                        maxHarrisPoint = Point(cX + wX, cY + wY);
-                    }
-                }
-            }
-            //Draw the circle in the image
-            circle(output, maxHarrisPoint, 2, Scalar(0, 0, 255));
         }
     }
     return output;
