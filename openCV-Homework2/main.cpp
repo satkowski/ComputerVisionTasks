@@ -10,7 +10,7 @@ int main( int argc, const char** argv ) {
 
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
-    keyMap = "{path     |   |../Bilder/checkerboard.jpg }"
+    keyMap = "{path     |   |../Bilder/prep-for-grilling.jpg }"
              "{filter   |1  |3                               }";
 
     //Reading the Callingarguments

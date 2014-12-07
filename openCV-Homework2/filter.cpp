@@ -298,8 +298,6 @@ Mat harrisCornerDetector(int w, Mat* input) {
     Mat tempInput, output;
     Mat partDerivX, partDerivY;
     Mat harrisMat, newAMat;
-    Mat sumSquDiffTemp, sumSquDiffMat;
-    Mat horizontalShift, verticalShift;
     Mat harrisValueMat;
     double harrisValue;
     double maxHarrisValue;
@@ -313,8 +311,6 @@ Mat harrisCornerDetector(int w, Mat* input) {
 
     partDerivX = Mat(tempInput.rows, tempInput.cols, CV_64F);
     partDerivY = Mat(tempInput.rows, tempInput.cols, CV_64F);
-
-    sumSquDiffMat = Mat_<double>(2*w + 1, 2*w + 1);
 
     //Calculate gradient in x direction
     for(int cY = 0; cY < tempInput.rows; cY++) {
@@ -333,36 +329,66 @@ Mat harrisCornerDetector(int w, Mat* input) {
         }
     }
 
+//    //Calculate the interest points
+//    for(int cY = w + 1; cY < tempInput.rows - w - 1; cY++) {
+//        for(int cX = w + 1; cX < tempInput.cols - w - 1; cX++) {
+//            //Iterate through all possible shifts in the window
+//            for(int wY = -w; wY <= w; wY++) {
+//                for(int wX = -w; wX <= w; wX++) {
+//                    harrisMat = (Mat_<double>(2, 2) << 0, 0, 0, 0);
+//                    //Fill the harris matrix
+//                    newAMat = (Mat_<double>(2, 2) <<
+//                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivX.at<double>(cY + wY, cX + wX),   //I of x square
+//                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX),   //I of x times I of y
+//                               partDerivY.at<double>(cY + wY, cX + wX) * partDerivX.at<double>(cY + wY, cX + wX),   //I of y times I of x
+//                               partDerivY.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX));  //I of y square
+//                    harrisMat += newAMat;
+//                }
+//            }
+//            //Calc the harris value
+//            harrisValue = (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) -
+//                           harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) -   //det(harrisMat)
+//                           k *
+//                         ((harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)) *
+//                          (harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)));   //trace(harrisMat) square
+//            harrisValue = abs(harrisValue);
+//            //Threshold for the harris value
+//            if(harrisValue > 50)
+//                harrisValueMat.at<double>(cY, cX) = harrisValue;
+//            else
+//                harrisValueMat.at<double>(cY, cX) = 0;
+
+////            std::cout << actualValue << ", " << std::endl;
+////            std::cout << harrisMat << " ## " << actualValue << std::endl;
+
+//        }
+////        std::cout << std::endl;
+//    }
+//    std::cout << harrisValueMat << std::endl;
+
     //Calculate the interest points
-    for(int cY = w + 1; cY < tempInput.rows - w - 1; cY++) {
-        for(int cX = w + 1; cX < tempInput.cols - w - 1; cX++) {
+    for(int cY = 1; cY < tempInput.rows - 1; cY++) {
+        for(int cX = 1; cX < tempInput.cols - 1; cX++) {
             //Iterate through all possible shifts in the window
-            for(int wY = -w; wY <= w; wY++) {
-                for(int wX = -w; wX <= w; wX++) {
-                    harrisMat = (Mat_<double>(2, 2) << 0, 0, 0, 0);
-                    //Fill the harris matrix
-                    newAMat = (Mat_<double>(2, 2) <<
-                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivX.at<double>(cY + wY, cX + wX),   //I of x square
-                               partDerivX.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX),   //I of x times I of y
-                               partDerivY.at<double>(cY + wY, cX + wX) * partDerivX.at<double>(cY + wY, cX + wX),   //I of y times I of x
-                               partDerivY.at<double>(cY + wY, cX + wX) * partDerivY.at<double>(cY + wY, cX + wX));  //I of y square
-                    harrisMat += newAMat;
-
-//                    horizontalShift = (Mat_<double>(1, 2) << wX, wY);
-//                    verticalShift = (Mat_<double>(2, 1) << wX, wY);
-
-//                    sumSquDiffTemp = (horizontalShift * harrisMat) * verticalShift;
-//                    sumSquDiffMat.at<double>(wY + w, wX + w) = sumSquDiffTemp.at<double>(0, 0);
-                }
-            }
+//            for(int wY = -w; wY <= w; wY++) {
+//                for(int wX = -w; wX <= w; wX++) {
+            //Fill the harris matrix
+            harrisMat = (Mat_<double>(2, 2) <<
+                       partDerivX.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),   //I of x square
+                       partDerivX.at<double>(cY, cX) * partDerivY.at<double>(cY, cX),   //I of x times I of y
+                       partDerivY.at<double>(cY, cX) * partDerivX.at<double>(cY, cX),   //I of y times I of x
+                       partDerivY.at<double>(cY, cX) * partDerivY.at<double>(cY, cX));  //I of y square
+//                }
+//            }
             //Calc the harris value
             harrisValue = (harrisMat.at<double>(0, 0) * harrisMat.at<double>(1, 1) -
                            harrisMat.at<double>(0, 1) * harrisMat.at<double>(1, 0)) -   //det(harrisMat)
                            k *
                          ((harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)) *
-                          (harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)));   //trace(A) square
+                          (harrisMat.at<double>(0, 0) + harrisMat.at<double>(1, 1)));   //trace(harrisMat) square
+            harrisValue = abs(harrisValue);
             //Threshold for the harris value
-            if(harrisValue > 1)
+            if(harrisValue > 50)
                 harrisValueMat.at<double>(cY, cX) = harrisValue;
             else
                 harrisValueMat.at<double>(cY, cX) = 0;
@@ -373,19 +399,18 @@ Mat harrisCornerDetector(int w, Mat* input) {
         }
 //        std::cout << std::endl;
     }
-//    std::cout << harrisValueMat << std::endl;
 
     //Non max suppresion on the harris value
-    int thresholdWindow = 5;
-    for(int cY = thresholdWindow; cY < harrisValueMat.rows - thresholdWindow; cY++) {
-        for(int cX = thresholdWindow; cX < harrisValueMat.cols - thresholdWindow; cX++) {
-            maxHarrisValue = -99999999;
+    for(int cY = w; cY < harrisValueMat.rows - w; cY++) {
+        for(int cX = w; cX < harrisValueMat.cols - w; cX++) {
+            maxHarrisValue = 0;
             //Iterate through the window and search the biggest harris value
-            for(int wY = -thresholdWindow; wY <= thresholdWindow; wY++) {
-                for(int wX = -thresholdWindow; wX <= thresholdWindow; wX++) {
+            for(int wY = -w; wY <= w; wY++) {
+                for(int wX = -w; wX <= w; wX++) {
                     //Set the new maximum
                     if(maxHarrisValue < harrisValueMat.at<double>(cY + wY, cX + wX)) {
                         maxHarrisValue = harrisValueMat.at<double>(cY + wY, cX + wX);
+//                        maxHarrisPoint = Point(cX + wX + w, cY + wY + w);
                         maxHarrisPoint = Point(cX + wX, cY + wY);
                     }
                 }
