@@ -11,7 +11,7 @@ int main( int argc, const char** argv ) {
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
     keyMap = "{path     |   |../Bilder/haus.jpg }"
-             "{filter   |1  |3                               }";
+             "{filter   |1  |0                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
