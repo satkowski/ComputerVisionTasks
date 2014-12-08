@@ -9,9 +9,10 @@
 #include <iostream>
 
 #define k 0.04
+#define PI 3.14159265
 
 //Method for the harris corner detector
-Mat harrisCornerDetector(int w, int threshholding, Mat* input);
+Mat harrisCornerDetector(int w, int gRange, int threshholding, Mat* input);
 
 //Thresholding with non-max-suppresion
 Mat windowSizeThreshold(int& w, Mat& harrisValueMat, Mat* input);

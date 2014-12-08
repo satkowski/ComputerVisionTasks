@@ -1,6 +1,6 @@
 #include <harrisDetector.h>
 
-Mat harrisCornerDetector(int w, int threshholding, Mat* input) {
+Mat harrisCornerDetector(int w, int gRange, int threshholding, Mat* input) {
     /*------------- initialization ------------*/
     Mat tempInput;
     Mat partDerivX, partDerivY;
