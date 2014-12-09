@@ -33,7 +33,7 @@ int main( int argc, const char** argv ) {
     //Creating windows for the images
     namedWindow("Original Image", 0);
     imshow("Original Image", image);
-    namedWindow("Outout Image", 0);
+    namedWindow("Output Image", 0);
 
     setTask(task, trackBarValue, data, image, outputImage);
 
@@ -43,29 +43,26 @@ int main( int argc, const char** argv ) {
 }
 
 void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputImage) {
-    createTrackbar("Window Size", "Output Image", &trackBarValue, 100, taskSelect, data);
+    createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
 
     //Show the image
-    imshow("Filtered Image", outputImage);
+    imshow("Output Image", outputImage);
 }
 
-void taskSelect(int, void* userdata) {
+void taskSelect(int taskBarValue, void* userdata) {
     /*------------- initialization ------------*/
     Vec<void*, 3>* data;
     int* task;
     Mat* image;
-    Mat outputImage;
-    Vec<Mat, 3> outputImages;
     /*-----------------------------------------*/
     //Cast all variables
     data = static_cast<Vec<void*, 3>*>(userdata);
     task = static_cast<int*>(data->val[0]);
     image = static_cast<Mat*>(data->val[1]);
 
-    outputImages = allTransformation(*task, image);
-    imshow("Output Image", outputImages.val[0]);
-    namedWindow("Original Image2", 0);
-    imshow("Output Image2", outputImages.val[1]);
-    namedWindow("Original Image3", 0);
-    imshow("Output Image3", outputImages.val[2]);
+    imshow("Output Image", logTrans(taskBarValue, image));
+//    namedWindow("Original Image2", 0);
+//    imshow("Output Image2", powerLawTrans(taskBarValue, image));
+//    namedWindow("Original Image3", 0);
+//    imshow("Output Image3", myChoiceTrans(taskBarValue, image));
 }

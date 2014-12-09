@@ -7,8 +7,6 @@
 
 using namespace cv;
 
-Vec<Mat, 3> allTransformation(int trackBarValue, Mat* input);
-
 //Method that calculate the log transformation of a given input
 Mat logTrans(int trackBarValue, Mat* input);
 //Method that calculate the power law transformation of a given input
