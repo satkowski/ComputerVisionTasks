@@ -13,7 +13,7 @@ using namespace cv;
 //Set the filter and the trackbar
 void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& outputImage);
 //Trackbar method that select wich filter was choosed
-static void filterSelect(int windowSize, void* userdata);
+static void taskSelect(int windowSize, void* userdata);
 
 //Main method
 int main( int argc, const char** argv );

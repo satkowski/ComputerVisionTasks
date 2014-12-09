@@ -48,7 +48,7 @@ void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& output
         break;
     default:
         //Adding the area trackbar to the window
-        createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols < image.rows) ? image.cols / 2 - 1 : image.rows / 2 - 1, filterSelect, data);
+        createTrackbar("Window Size", "Filtered Image", &windowSize, (image.cols < image.rows) ? image.cols / 2 - 1 : image.rows / 2 - 1, taskSelect, data);
         break;
     }
 
@@ -56,7 +56,7 @@ void setFilter(int& filter, int& windowSize, void* data, Mat& image, Mat& output
     imshow("Filtered Image", outputImage);
 }
 
-static void filterSelect(int windowSize, void* userdata) {
+static void taskSelect(int windowSize, void* userdata) {
     /*------------- initialization ------------*/
     Vec<void*, 3>* data;
     int* filter;
