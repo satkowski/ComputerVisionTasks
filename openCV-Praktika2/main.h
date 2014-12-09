@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <greyLevelTransformation.h>
+#include <histogrammFunctions.h>
 
 using namespace cv;
 

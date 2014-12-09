@@ -11,7 +11,7 @@ int main( int argc, const char** argv ) {
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
     keyMap = "{path     |   |../Bilder/haus.jpg }"
-             "{task     |1  |0                               }";
+             "{task     |1  |1                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -33,7 +33,6 @@ int main( int argc, const char** argv ) {
     //Creating windows for the images
     namedWindow("Original Image", 0);
     imshow("Original Image", image);
-    namedWindow("Output Image", 0);
 
     setTask(task, trackBarValue, data, image, outputImage);
 
@@ -43,10 +42,22 @@ int main( int argc, const char** argv ) {
 }
 
 void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputImage) {
-    createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
-
-    //Show the image
-    imshow("Output Image", outputImage);
+    /*------------- initialization ------------*/
+    vector<Mat> outputImages;
+    /*-----------------------------------------*/
+    switch(task) {
+    case 1:
+        outputImages = histogrammEqualizationOneChannel(&image);
+        //Show the images
+        imshow("PDF", outputImages.at(0));
+        imshow("CDF", outputImages.at(1));
+        break;
+    default:
+        createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
+        //Show the image
+        imshow("Output Image", outputImage);
+        break;
+    }
 }
 
 void taskSelect(int taskBarValue, void* userdata) {
