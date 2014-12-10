@@ -49,8 +49,11 @@ void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputI
     case 1:
         outputImages = histogrammEqualizationOneChannel(&image);
         //Show the images
-        imshow("PDF", outputImages.at(0));
-        imshow("CDF", outputImages.at(1));
+        imshow("CDF Spine", outputImages.at(0));
+        imshow("CDF input", outputImages.at(1));
+        imshow("Spine image", outputImages.at(2));
+        imshow("Equalization with pdf", outputImages.at(3));
+        imshow("Equalization with cdf", outputImages.at(4));
         break;
     default:
         createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
