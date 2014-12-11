@@ -10,6 +10,7 @@
 #include <greyLevelTransformation.h>
 #include <histogrammFunctions.h>
 #include <filter.h>
+#include <correlation.h>
 
 using namespace cv;
 

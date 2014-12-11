@@ -82,6 +82,9 @@ void setTask(int& task, int& trackBarValue, int& thresholdValue, void* data, Mat
         //Show the image
         imshow("Output Image", outputImage);
         break;
+    case 6:
+        outputImage = crossCorrelation();
+        imshow("Correlation", outputImage);
     default:
         namedWindow("Output Image");
         createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
