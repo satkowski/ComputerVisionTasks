@@ -14,9 +14,9 @@
 using namespace cv;
 
 //Set the task and the trackbar
-void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputImage);
+void setTask(int& task, int& trackBarValue, int& thresholdValue, void* data, Mat& image, Mat& outputImage);
 //Select the right method
-void taskSelect(int taskBarValue, void* userdata);
+void taskSelect(int, void* userdata);
 
 //Main method
 int main( int argc, const char** argv );
