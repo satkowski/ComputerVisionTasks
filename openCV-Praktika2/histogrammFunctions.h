@@ -9,8 +9,8 @@
 using namespace cv;
 
 vector<Mat> histogrammEqualizationOneChannel(Mat *input);
-vector<Mat> calcCDFandPDF(Mat* input);
-void histogrammEqualizationThreeChannel(Mat *input);
+vector<Mat> calcCDFandPDF(Mat* input, bool convert);
+vector<Mat> histogrammEqualizationThreeChannel(Mat *input);
 void histogrammMatching();
 
 

@@ -11,7 +11,7 @@ int main( int argc, const char** argv ) {
     const char* keyMap;
     //Standard image that will be used if dont exist arguments
     keyMap = "{path     |   |../Bilder/haus.jpg }"
-             "{task     |1  |1                               }";
+             "{task     |1  |2                               }";
 
     //Reading the Callingarguments
     CommandLineParser parser(argc, argv, keyMap);
@@ -54,6 +54,17 @@ void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputI
         imshow("Spine image", outputImages.at(2));
         imshow("Equalization with pdf", outputImages.at(3));
         imshow("Equalization with cdf", outputImages.at(4));
+        break;
+    case 2:
+        outputImages = histogrammEqualizationThreeChannel(&image);
+        imshow("CDF Rock B", outputImages.at(0));
+        imshow("CDF input B", outputImages.at(1));
+        imshow("CDF Rock G", outputImages.at(2));
+        imshow("CDF input G", outputImages.at(3));
+        imshow("CDF Rock R", outputImages.at(4));
+        imshow("CDF input R", outputImages.at(5));
+        imshow("Rock image", outputImages.at(6));
+        imshow("Equalization with cdf on all channel", outputImages.at(7));
         break;
     default:
         createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
