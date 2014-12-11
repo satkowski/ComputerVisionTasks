@@ -10,8 +10,7 @@ using namespace cv;
 
 vector<Mat> histogrammEqualizationOneChannel(Mat *input);
 vector<Mat> calcCDFandPDF(Mat* input, bool convert);
-vector<Mat> histogrammEqualizationThreeChannel(Mat *input);
-void histogrammMatching();
+vector<Mat> histogrammEqualizationThreeChannel(Mat *input, bool useAverage);
 
 
 #endif // HISTOGRAMMFUNCTIONS_H

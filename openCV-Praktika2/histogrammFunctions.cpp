@@ -102,13 +102,13 @@ vector<Mat> histogrammEqualizationOneChannel(Mat *input) {
 }
 
 
-vector<Mat> histogrammEqualizationThreeChannel(Mat *input) {
+vector<Mat> histogrammEqualizationThreeChannel(Mat *input, bool useAverage) {
     /*------------- initialization ------------*/
     String filename = "../openCV-Praktika2/taskImages/rocks.jpg";
     vector<Mat> image1Split, image2Split;
     vector<Mat> image1[3], image2[3];
     Mat firstImage, cdfOutputImage;
-    Mat cdf1[3], cdf2[3], lut[3];
+    Mat cdf1[3], cdf2[3], lutChannel[3], lutAverage;
     bool lutSet[3];
     /*-----------------------------------------*/
 
@@ -128,7 +128,7 @@ vector<Mat> histogrammEqualizationThreeChannel(Mat *input) {
         image2[c] = calcCDFandPDF(&image2Split[c], false);
         cdf1[c] = image1[c].at(1);
         cdf2[c] = image2[c].at(1);
-        lut[c] = Mat(cdf1[c].rows, 1 , CV_8U);
+        lutChannel[c] = Mat(cdf1[c].rows, 1 , CV_8U);
     }
     cdfOutputImage = Mat(firstImage.rows, firstImage.cols, CV_8UC3);
 
@@ -142,7 +142,7 @@ vector<Mat> histogrammEqualizationThreeChannel(Mat *input) {
                 //A match if the cdf1 value is bigger than the cdf2 value or its the last value in cdf2
                 if((cdf1[channel].at<float>(c1) <= cdf2[channel].at<float>(c2) || (c2 + 1) == cdf2[channel].rows)
                     && !lutSet[channel]) {
-                    lut[channel].at<uchar>(c1) = c2;
+                    lutChannel[channel].at<uchar>(c1) = c2;
                     lutSet[channel] = true;
                 }
             }
@@ -152,9 +152,9 @@ vector<Mat> histogrammEqualizationThreeChannel(Mat *input) {
     //Calculate the cdf image
     for(int cY = 0; cY < cdfOutputImage.rows; cY++)
         for(int cX = 0; cX < cdfOutputImage.cols; cX++)
-            cdfOutputImage.at<Vec3b>(cY, cX) = Vec3b { lut[0].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[0]),
-                                                       lut[1].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[1]),
-                                                       lut[2].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[2]) };
+            cdfOutputImage.at<Vec3b>(cY, cX) = Vec3b { lutChannel[0].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[0]),
+                                                       lutChannel[1].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[1]),
+                                                       lutChannel[2].at<uchar>(firstImage.at<Vec3b>(cY, cX).val[2]) };
 
     //Create the vector and return it
     return vector<Mat> { image1[0].at(3), image2[0].at(3),
