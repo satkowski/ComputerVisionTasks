@@ -69,7 +69,12 @@ void setTask(int& task, int& trackBarValue, void* data, Mat& image, Mat& outputI
     case 3:
         outputImages = histogrammEqualizationThreeChannel(&image, true);
         break;
+    case 4:
+        outputImage = sharpening(&image);
+        imshow("Unsharp mask", outputImage);
+        break;
     default:
+        namedWindow("Output image");
         createTrackbar("Window Size", "Output Image", &trackBarValue, 582, taskSelect, data);
         //Show the image
         imshow("Output Image", outputImage);
@@ -88,9 +93,16 @@ void taskSelect(int taskBarValue, void* userdata) {
     task = static_cast<int*>(data->val[0]);
     image = static_cast<Mat*>(data->val[1]);
 
-    imshow("Output Image", logTrans(taskBarValue, image));
-//    namedWindow("Original Image2", 0);
-//    imshow("Output Image2", powerLawTrans(taskBarValue, image));
-//    namedWindow("Original Image3", 0);
-//    imshow("Output Image3", myChoiceTrans(taskBarValue, image));
+    switch (*task) {
+    case 0:
+        imshow("Output Image", logTrans(taskBarValue, image));
+    //    namedWindow("Original Image2", 0);
+    //    imshow("Output Image2", powerLawTrans(taskBarValue, image));
+    //    namedWindow("Original Image3", 0);
+    //    imshow("Output Image3", myChoiceTrans(taskBarValue, image));
+        break;
+    case 5:
+        imshow("Output Image", medianThreshold(taskBarValue, image));
+        break;
+    }
 }

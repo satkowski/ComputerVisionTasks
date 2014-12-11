@@ -9,6 +9,7 @@
 
 #include <greyLevelTransformation.h>
 #include <histogrammFunctions.h>
+#include <filter.h>
 
 using namespace cv;
 
