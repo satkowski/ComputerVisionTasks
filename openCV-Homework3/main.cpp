@@ -16,7 +16,7 @@ int main( int argc, const char** argv ) {
     filename = parser.get<String>("path");
 
     //Creating the image and testing if it is empty or not
-    image = imread(filename);
+    image = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
     if(image.empty()) {
         printf("Cannot read the image %s\n", filename.c_str());
         return -1;
@@ -27,60 +27,111 @@ int main( int argc, const char** argv ) {
     namedWindow("Original Image", 0);
     imshow("Original Image", image);
     namedWindow("Fourier Image", 0);
-    imshow("Fourier Image", fourier(image));
+    imshow("Fourier Image", task(image));
 
     waitKey();
     return 0;
 }
 
-Mat fourier(Mat& input) {
-    Mat tempInput;
-    cvtColor(input, tempInput, CV_BGR2GRAY);
+Mat task(Mat& input) {
+    /*------------- initialization ------------*/
+   Mat tempInput, complexDFTInput, tempOutput, output;
+    Vector<float> intesities;
+    float maxItensity = 0, maxValue = 0;
+    int intensityCounter;
+    Mat thresholdMat;
+    Point maxPoint(0,0);
+    /*-----------------------------------------*/
 
-    Mat padded;                              //expand input image to optimal size
-    int m = getOptimalDFTSize( tempInput.rows );
-    int n = getOptimalDFTSize( tempInput.cols ); // on the border add zero values
-    copyMakeBorder(tempInput, padded, 0, m - tempInput.rows, 0, n - tempInput.cols, BORDER_CONSTANT, Scalar::all(0));
-    padded.convertTo(padded, CV_32F);
+    //Convert the Mat values to floats and make a fourier transformation
+    input.convertTo(tempInput, CV_32F);
+    dft(tempInput, complexDFTInput, DFT_COMPLEX_OUTPUT);
 
-    Mat planes[] = {padded, Mat::zeros(padded.rows, padded.cols, CV_32F)};
-    Mat complexI;
-    merge(planes, 2, complexI);         // Add to the expanded another plane with zeros
+    //Add all values from the fourier transformation to a vector as complex-float numbers
+    for(int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
+        for(int cCol = 0; cCol < complexDFTInput.cols; cCol++) {
+            intesities.push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).imag());
+            intesities.push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).real());
+        }
+    }
+    //Search the maxima in the whole vector to sort it afterwards
+    for(unsigned int c = 0; c < intesities.size(); c++)
+        maxItensity = maxItensity >= intesities[c] ? maxItensity : intesities[c];
+    std::sort(intesities.begin(), intesities.end(), sortVector);
+    //Count the intensities that are greate than the max * 0.045
+    for(intensityCounter = 0; intesities[intensityCounter] > maxItensity * 0.045; intensityCounter++);
+    intensityCounter--;
 
-    dft(complexI, complexI);            // this way the result may fit in the source matrix
+    //Fill the thresholdMat with 255 and the size of the complexDFTInput
+    complexDFTInput.copyTo(thresholdMat);
+    thresholdMat.setTo(255);
 
-    // compute the magnitude and switch to logarithmic scale
-    // => log(1 + sqrt(Re(DFT(input))^2 + Im(DFT(input))^2))
-    split(complexI, planes);                   // planes[0] = Re(DFT(input), planes[1] = Im(DFT(input))
-    magnitude(planes[0], planes[1], planes[0]);// planes[0] = magnitude
-    Mat magI = planes[0];
+    for (int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
+        for (int cCol=0; cCol< complexDFTInput.cols;cCol++) {
+            //Set those of the thresholdMat 0 that are below the intensity in imaginary and real
+            if (complexDFTInput.at<std::complex<float> >(cRow, cCol).imag() < intesities[intensityCounter] &&
+                complexDFTInput.at<std::complex<float> >(cRow, cCol).real() < intesities[intensityCounter])
+                thresholdMat.at<std::complex<float> >(cRow, cCol) = 0;
+            //Set those of the trehsholdMat the same value as the complexDFTInput value if that are great in imaginary or real
+            else
+                thresholdMat.at<std::complex<float> >(cRow, cCol) = complexDFTInput.at<std::complex<float> >(cRow, cCol);
+        }
+    }
 
-    magI += Scalar::all(1);                    // switch to logarithmic scale
-    log(magI, magI);
+    for (int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
+        for (int cCol=0; cCol< complexDFTInput.cols; cCol++) {
+            //Search for the maximum value in complexDFTInput and save its point
+            if (complexDFTInput.at<float>(cRow, cCol) > maxValue) {
+                maxValue = complexDFTInput.at<float>(cRow, cCol);
+                maxPoint = Point(cRow, cCol);
+            }
+        }
+    }
+    //Set the maxPoint also 0
+    thresholdMat.at< std::complex<float> >(maxPoint) = 0;
 
-    // crop the spectrum, if it has an odd number of rows or columns
-    magI = magI(Rect(0, 0, magI.cols & -2, magI.rows & -2));
+    //Make a inverse fourier transformation and convert it back
+    idft(complexDFTInput, tempOutput, DFT_REAL_OUTPUT|DFT_SCALE);
+    tempOutput.convertTo(tempOutput, CV_8U);
+    output = combineImages(input, tempOutput);
 
-    // rearrange the quadrants of Fourier image  so that the origin is at the image center
-    int cx = magI.cols/2;
-    int cy = magI.rows/2;
+    return output;
+}
 
-    Mat q0(magI, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
-    Mat q1(magI, Rect(cx, 0, cx, cy));  // Top-Right
-    Mat q2(magI, Rect(0, cy, cx, cy));  // Bottom-Left
-    Mat q3(magI, Rect(cx, cy, cx, cy)); // Bottom-Right
+bool sortVector(float left, float right) {
+    return left >= right;
+}
 
-    Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
-    q0.copyTo(tmp);
-    q3.copyTo(q0);
-    tmp.copyTo(q3);
+Mat combineImages(Mat firstImage, Mat secondImage) {
+    /*------------- initialization ------------*/
+    Mat combinedImage;
+    int sumSecI = 0, maxSecI = 0, percSecI = 0;
+    /*-----------------------------------------*/
+    combinedImage = Mat::zeros(firstImage.size(), CV_8UC3);
 
-    q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
-    q2.copyTo(q1);
-    tmp.copyTo(q2);
-
-    normalize(magI, magI, 0, 1, CV_MINMAX); // Transform the matrix with float values into a
-                                          // viewable image form (float between values 0 and 1).
-
-    return magI;
+    for(int cRow = 0; cRow < firstImage.rows; cRow++) {
+        for(int cCol = 0; cCol < firstImage.cols; cCol++) {
+            int current;
+            current = static_cast<int>(secondImage.at<uchar>(cRow, cCol));
+            //Sum all values of the second image
+            sumSecI += current;
+            //Save the highest value
+            if(current > maxSecI)
+                maxSecI = current;
+        }
+    }
+    percSecI = static_cast<int>(maxSecI * 0.075);
+    for(int cRow = 0; cRow < firstImage.rows; cRow++) {
+        for(int cCol = 0; cCol < firstImage.cols; cCol++) {
+            //Make the pixel red
+            if(secondImage.at<unsigned char>(cRow, cCol) > percSecI)
+                combinedImage.at<Vec3b>(cRow,cCol) = Vec3b(10,10,255);
+            //Use the color of the first image
+            else
+                combinedImage.at<Vec3b>(cRow,cCol) = Vec3b(firstImage.at<char>(cRow, cCol),
+                                                           firstImage.at<char>(cRow, cCol),
+                                                           firstImage.at<char>(cRow, cCol));
+        }
+    }
+    return combinedImage;
 }

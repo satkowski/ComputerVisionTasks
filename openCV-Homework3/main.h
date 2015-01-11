@@ -9,8 +9,12 @@
 
 using namespace cv;
 
-//
-Mat fourier(Mat& input);
+//Method for the task
+Mat task(Mat& input);
+//Used to sort a vector properly
+bool sortVector(float left, float right);
+//Combine two images
+Mat combineImages(Mat firstImage, Mat secondImage);
 
 //Main method
 int main( int argc, const char** argv );
