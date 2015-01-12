@@ -62,12 +62,12 @@ Mat task(Mat& input) {
     for(intensityCounter = 0; intesities[intensityCounter] > maxItensity * 0.045; intensityCounter++);
     intensityCounter--;
 
-    //Fill the thresholdMat with 255 and the size of the complexDFTInput
+    //Fill the thresholdMat with 255 and the size and type of the complexDFTInput
     complexDFTInput.copyTo(thresholdMat);
     thresholdMat.setTo(255);
 
     for (int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
-        for (int cCol=0; cCol< complexDFTInput.cols;cCol++) {
+        for (int cCol = 0; cCol < complexDFTInput.cols; cCol++) {
             //Set those of the thresholdMat 0 that are below the intensity in imaginary and real
             if (complexDFTInput.at<std::complex<float> >(cRow, cCol).imag() < intesities[intensityCounter] &&
                 complexDFTInput.at<std::complex<float> >(cRow, cCol).real() < intesities[intensityCounter])
@@ -75,11 +75,7 @@ Mat task(Mat& input) {
             //Set those of the trehsholdMat the same value as the complexDFTInput value if that are great in imaginary or real
             else
                 thresholdMat.at<std::complex<float> >(cRow, cCol) = complexDFTInput.at<std::complex<float> >(cRow, cCol);
-        }
-    }
 
-    for (int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
-        for (int cCol=0; cCol< complexDFTInput.cols; cCol++) {
             //Search for the maximum value in complexDFTInput and save its point
             if (complexDFTInput.at<float>(cRow, cCol) > maxValue) {
                 maxValue = complexDFTInput.at<float>(cRow, cCol);
@@ -87,11 +83,12 @@ Mat task(Mat& input) {
             }
         }
     }
+
     //Set the maxPoint also 0
-    thresholdMat.at< std::complex<float> >(maxPoint) = 0;
+    thresholdMat.at<std::complex<float> >(maxPoint) = 0;
 
     //Make a inverse fourier transformation and convert it back
-    idft(complexDFTInput, tempOutput, DFT_REAL_OUTPUT|DFT_SCALE);
+    idft(thresholdMat, tempOutput, DFT_REAL_OUTPUT|DFT_SCALE);
     tempOutput.convertTo(tempOutput, CV_8U);
     output = combineImages(input, tempOutput);
 
@@ -111,13 +108,10 @@ Mat combineImages(Mat firstImage, Mat secondImage) {
 
     for(int cRow = 0; cRow < firstImage.rows; cRow++) {
         for(int cCol = 0; cCol < firstImage.cols; cCol++) {
-            int current;
-            current = static_cast<int>(secondImage.at<uchar>(cRow, cCol));
-            //Sum all values of the second image
-            sumSecI += current;
+            sumSecI += static_cast<int>(secondImage.at<uchar>(cRow, cCol));
             //Save the highest value
-            if(current > maxSecI)
-                maxSecI = current;
+            if(static_cast<int>(secondImage.at<uchar>(cRow, cCol)) > maxSecI)
+                maxSecI = static_cast<int>(secondImage.at<uchar>(cRow, cCol));
         }
     }
     percSecI = static_cast<int>(maxSecI * 0.075);
