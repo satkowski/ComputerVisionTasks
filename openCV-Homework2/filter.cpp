@@ -99,7 +99,7 @@ Mat medianFilterOneSet(int w, Mat *input) {
     }
     oldRowPixelSet = actualpixelSet;
 
-    auto begin = std::chrono::high_resolution_clock::now();
+//    auto begin = std::chrono::high_resolution_clock::now();
     for(int cY = w; cY < tempInput.rows - w; cY++) {
         for(int wX = -w; wX <= w && cY != w; wX++) {
             oldRowPixelSet.erase(oldRowPixelSet.find(tempInput.at<Vec3d>(cY - w - 1, w + wX)));
@@ -120,9 +120,9 @@ Mat medianFilterOneSet(int w, Mat *input) {
             std::advance(median, actualpixelSet.size() / 2);
             tempOutput.at<Vec3d>(cY - w, cX - w) = *median;
         }
-        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
-        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
+//        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
+//        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+//        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
     }
     tempOutput.convertTo(output, CV_8UC3);
     return output;
@@ -155,7 +155,7 @@ Mat medianFilterTwoSets(int w, Mat *input) {
     }
     oldRowLowerHalf = lowerHalf;
 
-    auto begin = std::chrono::high_resolution_clock::now();
+//    auto begin = std::chrono::high_resolution_clock::now();
     for(int cY = w; cY < tempInput.rows - w; cY++) {
         //Add and delte Pixel
         for(int wX = -w; wX <= w && cY != w; wX++) {
@@ -245,9 +245,9 @@ Mat medianFilterTwoSets(int w, Mat *input) {
 //            long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 //            std::cout << "Time at " << cY << "," << cX << ":    " << double(microseconds) / 1000000 << std::endl;
         }
-        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
-        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
+//        auto elapsed = std::chrono::high_resolution_clock::now() - begin;
+//        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+//        std::cout << "Time at " << cY << ":    " << double(microseconds) / 1000000 << std::endl;
 //        std::cout << "-------------------" << std::endl;
     }
     tempOutput.convertTo(output, CV_8UC3);
