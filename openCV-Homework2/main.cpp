@@ -5,7 +5,7 @@ int main( int argc, const char** argv ) {
     String filename;
     int filter, windowSize = 0;
     Mat image, outputImage;
-    Vec<void*, 2>* data;
+    Vec<void*, 2> data;
     /*-----------------------------------------*/
 
     const char* keyMap;
@@ -27,15 +27,15 @@ int main( int argc, const char** argv ) {
     image.copyTo(outputImage);
 
     //Filling the data pointer
-    data->val[0] = &filter;
-    data->val[1] = &image;
+    data.val[0] = &filter;
+    data.val[1] = &image;
 
     //Creating windows for the images
     namedWindow("Original Image", 0);
     imshow("Original Image", image);
     namedWindow("Filtered Image", 0);
 
-    setFilter(filter, windowSize, data, image, outputImage);
+    setFilter(filter, windowSize, &data, image, outputImage);
 
     waitKey();
     return 0;
