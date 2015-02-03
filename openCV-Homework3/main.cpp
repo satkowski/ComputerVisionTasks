@@ -36,9 +36,11 @@ int main( int argc, const char** argv ) {
 Mat task(Mat& input) {
     /*------------- initialization ------------*/
    Mat tempInput, complexDFTInput, tempOutput, output;
-    Vector<float> intesities;
-    float maxItensity = 0, maxValue = 0;
-    int intensityCounter;
+    Vector<float>* intensities = new Vector<float>[2];
+    float maxValue = 0;
+    float maxIntensity = 0;
+    float intensityDiff = std::numeric_limits<float>::max();
+    int intensityCounter = 0;
     Mat thresholdMat;
     Point maxPoint(0,0);
     /*-----------------------------------------*/
@@ -47,20 +49,30 @@ Mat task(Mat& input) {
     input.convertTo(tempInput, CV_32F);
     dft(tempInput, complexDFTInput, DFT_COMPLEX_OUTPUT);
 
+    intensities[0] = Vector<float>();
+    intensities[1] = Vector<float>();
     //Add all values from the fourier transformation to a vector as complex-float numbers
     for(int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
         for(int cCol = 0; cCol < complexDFTInput.cols; cCol++) {
-            intesities.push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).imag());
-            intesities.push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).real());
+            intensities[0].push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).imag());
+            intensities[1].push_back(complexDFTInput.at<std::complex<float> >(cRow, cCol).real());
         }
     }
     //Search the maxima in the whole vector to sort it afterwards
-    for(unsigned int c = 0; c < intesities.size(); c++)
-        maxItensity = maxItensity >= intesities[c] ? maxItensity : intesities[c];
-    std::sort(intesities.begin(), intesities.end(), sortVector);
+    for(unsigned int c = 0; c < intensities[1].size(); c++) {
+        maxIntensity = maxIntensity >= intensities[1][c] ? maxIntensity : intensities[1][c];
+    }
+//    std::sort(intensities.begin(), intensities.end(), sortVector);
     //Count the intensities that are greate than the max * 0.045
-    for(intensityCounter = 0; intesities[intensityCounter] > maxItensity * 0.045; intensityCounter++);
-    intensityCounter--;
+//    for(intensityCounter = 0; intensities[intensityCounter] > maxIntensity * 0.045; intensityCounter++);
+//    intensityCounter--;
+    for(unsigned int c = 0; c < intensities[1].size(); c++) {
+        if(intensityDiff > intensities[1][c] - maxIntensity * 0.045 &&
+           (intensities[1][c] - maxIntensity * 0.045) * -1 < 0) {
+            intensityDiff = intensities[1][c] - maxIntensity * 0.045;
+            intensityCounter = c;
+        }
+    }
 
     //Fill the thresholdMat with 255 and the size and type of the complexDFTInput
     complexDFTInput.copyTo(thresholdMat);
@@ -69,8 +81,8 @@ Mat task(Mat& input) {
     for (int cRow = 0; cRow < complexDFTInput.rows; cRow++) {
         for (int cCol = 0; cCol < complexDFTInput.cols; cCol++) {
             //Set those of the thresholdMat 0 that are below the intensity in imaginary and real
-            if (complexDFTInput.at<std::complex<float> >(cRow, cCol).imag() < intesities[intensityCounter] &&
-                complexDFTInput.at<std::complex<float> >(cRow, cCol).real() < intesities[intensityCounter])
+            if (complexDFTInput.at<std::complex<float> >(cRow, cCol).imag() < intensities[0][intensityCounter] &&
+                complexDFTInput.at<std::complex<float> >(cRow, cCol).real() < intensities[1][intensityCounter])
                 thresholdMat.at<std::complex<float> >(cRow, cCol) = 0;
             //Set those of the trehsholdMat the same value as the complexDFTInput value if that are great in imaginary or real
             else
